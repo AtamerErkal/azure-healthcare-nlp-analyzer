@@ -1,11 +1,10 @@
-import json
 import os
-from datetime import datetime
-from typing import Any, Dict, List
-
 from dotenv import load_dotenv
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+import json
+from datetime import datetime
+import glob
 
 
 class PIIRedactor:
@@ -20,85 +19,169 @@ class PIIRedactor:
 
         self.client = TextAnalyticsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
-    def detect_pii(self, text: str) -> List[Dict[str, Any]]:
-        response = self.client.recognize_pii_entities([text])
-        result = response[0]
+    def detect_medical_entities(self, text: str) -> list:
+        """
+        Detect medical entities (names, locations, organizations, specific dates).
+        """
+        try:
+            response = self.client.recognize_entities(documents=[text], language="en")
+            entities: list = []
 
-        if getattr(result, "is_error", False):
-            raise RuntimeError(f"Error from Text Analytics service: {result.error}")
+            for doc in response:
+                if getattr(doc, "is_error", False):
+                    continue
 
-        entities: List[Dict[str, Any]] = []
-        for entity in result.entities:
-            entities.append(
-                {
-                    "text": entity.text,
-                    "category": entity.category,
-                    "confidence_score": float(entity.confidence_score),
-                    "offset": int(entity.offset),
-                    "length": int(entity.length),
-                }
-            )
+                for entity in doc.entities:
+                    if entity.category == "Person":
+                        entities.append(
+                            {
+                                "text": entity.text,
+                                "category": entity.category,
+                                "confidence_score": float(entity.confidence_score),
+                                "offset": int(entity.offset),
+                                "length": int(entity.length),
+                            }
+                        )
+                    elif entity.category == "Location":
+                        entities.append(
+                            {
+                                "text": entity.text,
+                                "category": entity.category,
+                                "confidence_score": float(entity.confidence_score),
+                                "offset": int(entity.offset),
+                                "length": int(entity.length),
+                            }
+                        )
+                    elif entity.category == "Organization":
+                        entities.append(
+                            {
+                                "text": entity.text,
+                                "category": entity.category,
+                                "confidence_score": float(entity.confidence_score),
+                                "offset": int(entity.offset),
+                                "length": int(entity.length),
+                            }
+                        )
+                    elif entity.category == "DateTime":
+                        if entity.confidence_score > 0.95 and any(char.isdigit() for char in entity.text):
+                            entities.append(
+                                {
+                                    "text": entity.text,
+                                    "category": entity.category,
+                                    "confidence_score": float(entity.confidence_score),
+                                    "offset": int(entity.offset),
+                                    "length": int(entity.length),
+                                }
+                            )
 
-        return entities
+            return entities
+        except Exception as exc:
+            print(f"Error in medical entity detection: {exc}")
+            return []
 
-    def redact_text(self, text: str, entities: List[Dict[str, Any]]) -> str:
-        if not entities:
-            return text
+    def detect_contact_pii(self, text: str) -> list:
+        """
+        Detect contact PII ONLY (email, phone, SSN, IP, URL).
+        """
+        try:
+            response = self.client.recognize_pii_entities(documents=[text], language="en")
+            entities: list = []
 
-        sorted_entities = sorted(entities, key=lambda e: e["offset"])
-        redacted_parts: List[str] = []
-        current_index = 0
+            for doc in response:
+                if getattr(doc, "is_error", False):
+                    continue
 
-        for entity in sorted_entities:
+                for entity in doc.entities:
+                    if entity.category in [
+                        "Email",
+                        "PhoneNumber",
+                        "USSocialSecurityNumber",
+                        "IPAddress",
+                        "URL",
+                    ]:
+                        entities.append(
+                            {
+                                "text": entity.text,
+                                "category": entity.category,
+                                "confidence_score": float(entity.confidence_score),
+                                "offset": int(entity.offset),
+                                "length": int(entity.length),
+                            }
+                        )
+
+            return entities
+        except Exception as exc:
+            print(f"Error in PII detection: {exc}")
+            return []
+
+    def redact_text(self, text: str, medical_entities: list, pii_entities: list) -> str:
+        """
+        Redact text based on BOTH medical and PII entities.
+        """
+        redacted = text
+        all_entities = medical_entities + pii_entities
+
+        all_entities.sort(key=lambda x: x["offset"], reverse=True)
+
+        for entity in all_entities:
             start = entity["offset"]
-            length = entity["length"]
+            end = start + entity["length"]
 
-            if start < current_index:
+            category = entity["category"]
+            if category == "Person":
+                tag = "[PERSON]"
+            elif category == "Location":
+                tag = "[LOCATION]"
+            elif category == "Organization":
+                tag = "[ORGANIZATION]"
+            elif category == "DateTime":
+                tag = "[DATE]"
+            elif category == "Email":
+                tag = "[EMAIL]"
+            elif category == "PhoneNumber":
+                tag = "[PHONE]"
+            elif category == "USSocialSecurityNumber":
+                tag = "[SSN]"
+            elif category == "IPAddress":
+                tag = "[IP]"
+            elif category == "URL":
+                tag = "[URL]"
+            else:
                 continue
 
-            redacted_parts.append(text[current_index:start])
-            redacted_parts.append(f"[{entity['category']}]")
-            current_index = start + length
+            redacted = redacted[:start] + tag + redacted[end:]
 
-        redacted_parts.append(text[current_index:])
-        return "".join(redacted_parts)
+        return redacted
 
-    def process_document(self, text: str) -> Dict[str, Any]:
-        entities = self.detect_pii(text)
-        redacted = self.redact_text(text, entities)
-        categories = sorted({entity["category"] for entity in entities})
+    def process_document(self, text: str) -> dict:
+        medical_entities = self.detect_medical_entities(text)
+        pii_entities = self.detect_contact_pii(text)
+        redacted_text = self.redact_text(text, medical_entities, pii_entities)
 
         return {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now().isoformat(),
             "original_text": text,
-            "detected_entities": entities,
-            "redacted_text": redacted,
-            "entity_count": len(entities),
-            "categories": categories,
+            "medical_entities": medical_entities,
+            "pii_entities": pii_entities,
+            "total_entities": len(medical_entities) + len(pii_entities),
+            "redacted_text": redacted_text,
         }
 
-    def save_results(self, results: Dict[str, Any], filepath: str) -> None:
-        directory = os.path.dirname(filepath)
-        if directory:
-            os.makedirs(directory, exist_ok=True)
-
+    def save_results(self, results: dict, filepath: str) -> None:
+        os.makedirs("data", exist_ok=True)
         with open(filepath, "w", encoding="utf-8") as f:
-            json.dump(results, f, indent=2, ensure_ascii=False)
+            json.dump(results, f, indent=2)
 
-    def process_batch(self, input_dir: str, output_dir: str) -> Dict[str, Any]:
-        """
-        Process multiple text files from input_dir and save redacted versions.
-        """
-        import glob
-
+    def process_batch(self, input_dir: str, output_dir: str) -> dict:
+        """Process multiple text files"""
         files = glob.glob(os.path.join(input_dir, "*.txt"))
 
-        results: Dict[str, Any] = {
+        results = {
             "timestamp": datetime.now().isoformat(),
             "total_files": len(files),
-            "total_pii_found": 0,
+            "total_entities": 0,
             "files_processed": [],
-            "category_breakdown": {},
+            "category_breakdown": {}
         }
 
         os.makedirs(output_dir, exist_ok=True)
@@ -107,96 +190,92 @@ class PIIRedactor:
             filename = os.path.basename(filepath)
             print(f"\n📄 Processing: {filename}")
 
-            with open(filepath, "r", encoding="utf-8") as f:
+            with open(filepath, 'r', encoding='utf-8') as f:
                 text = f.read()
 
-            entities = self.detect_pii(text)
-            redacted = self.redact_text(text, entities)
+            doc_result = self.process_document(text)
 
+            # Save redacted file
             output_path = os.path.join(output_dir, f"redacted_{filename}")
-            with open(output_path, "w", encoding="utf-8") as f:
-                f.write(redacted)
+            with open(output_path, 'w', encoding='utf-8') as f:
+                f.write(doc_result["redacted_text"])
 
-            pii_count = len(entities)
-            results["total_pii_found"] += pii_count
+            # Update statistics
+            entity_count = doc_result["total_entities"]
+            results["total_entities"] += entity_count
+
+            all_entities = doc_result["medical_entities"] + doc_result["pii_entities"]
 
             file_result = {
                 "filename": filename,
-                "pii_count": pii_count,
-                "categories": [e["category"] for e in entities],
+                "entity_count": entity_count,
+                "categories": [e["category"] for e in all_entities]
             }
             results["files_processed"].append(file_result)
 
-            for entity in entities:
+            # Count categories
+            for entity in all_entities:
                 cat = entity["category"]
                 results["category_breakdown"][cat] = results["category_breakdown"].get(cat, 0) + 1
 
-            print(f"  ✅ Found {pii_count} PII entities")
+            print(f"  ✅ Found {entity_count} entities")
 
         return results
 
 
-sample_text = """
-Patient: John Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789.
-Admitted on January 20, 2024 at Memorial Hospital.
-Chief Complaint: Type 2 Diabetes and Hypertension.
-Medications: Metformin 500mg BID, Lisinopril 10mg QD.
-Contact: john.smith@email.com, Phone: +1-555-0123.
-"""
-
-
 if __name__ == "__main__":
-    try:
-        redactor = PIIRedactor()
+    import sys
 
-        import sys
+    redactor = PIIRedactor()
 
-        if len(sys.argv) > 1 and sys.argv[1] == "--batch":
-            print("=" * 60)
-            print("BATCH PROCESSING MODE")
-            print("=" * 60)
+    if len(sys.argv) > 1 and sys.argv[1] == "--batch":
+        # Batch mode
+        print("=" * 70)
+        print("BATCH PROCESSING MODE")
+        print("=" * 70)
 
-            results = redactor.process_batch(
-                input_dir="data/sample_texts",
-                output_dir="data/redacted_texts",
-            )
+        results = redactor.process_batch(
+            input_dir="data/sample_texts",
+            output_dir="data/redacted_texts"
+        )
 
-            print("\n" + "=" * 60)
-            print("BATCH PROCESSING SUMMARY")
-            print("=" * 60)
-            print(f"Total files processed: {results['total_files']}")
-            print(f"Total PII entities found: {results['total_pii_found']}")
-            print(f"\nCategory Breakdown:")
-            for category, count in results["category_breakdown"].items():
-                print(f"  - {category}: {count}")
+        print("\n" + "=" * 70)
+        print("BATCH PROCESSING SUMMARY")
+        print("=" * 70)
+        print(f"Total files processed: {results['total_files']}")
+        print(f"Total entities found: {results['total_entities']}")
+        print(f"\nCategory Breakdown:")
+        for category, count in sorted(results['category_breakdown'].items()):
+            print(f"  - {category}: {count}")
 
-            redactor.save_results(results, "data/batch_summary.json")
-            print(f"\n✅ Summary saved to data/batch_summary.json")
-            print(f"✅ Redacted files saved to data/redacted_texts/")
-        else:
-            result = redactor.process_document(sample_text)
+        redactor.save_results(results, "data/batch_summary.json")
+        print(f"\n✅ Summary saved to data/batch_summary.json")
+        print(f"✅ Redacted files saved to data/redacted_texts/")
 
-            print("=" * 60)
-            print("ORIGINAL TEXT:")
-            print(result["original_text"])
+    else:
+        # Single document mode (keep existing code)
+        sample_text = """Annual checkup: Linda Martinez, Age 45, BMI 28.5.
+Labs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.
+Recommendations: Lifestyle modification, recheck in 6 months.
+Email: lmartinez@email.com, Phone: +1-555-4567."""
 
-            print("\n" + "=" * 60)
-            print("DETECTED PII ENTITIES:")
-            for entity in result["detected_entities"]:
-                print(
-                    f"  - {entity['text']} ({entity['category']}) "
-                    f"[confidence: {entity['confidence_score']:.2f}]"
-                )
+        result = redactor.process_document(sample_text)
 
-            print("\n" + "=" * 60)
-            print("REDACTED TEXT:")
-            print(result["redacted_text"])
-
-            print("\n" + "=" * 60)
-            print(f"Total PII entities found: {result['entity_count']}")
-            print(f"Categories: {', '.join(result['categories'])}")
-
-            redactor.save_results(result, "data/pii_results.json")
-            print("\nResults saved to data/pii_results.json")
-    except Exception as exc:
-        print(f"\nError while running PII redaction: {exc}")
+        print("=" * 70)
+        print("ORIGINAL TEXT:")
+        print(result["original_text"])
+        print("\n" + "=" * 70)
+        print("DETECTED MEDICAL ENTITIES:")
+        for entity in result["medical_entities"]:
+            print(f"  - {entity['text']} ({entity['category']}) [confidence: {entity['confidence_score']:.2f}]")
+        print("\n" + "=" * 70)
+        print("DETECTED PII (Contact Info):")
+        for entity in result["pii_entities"]:
+            print(f"  - {entity['text']} ({entity['category']}) [confidence: {entity['confidence_score']:.2f}]")
+        print("\n" + "=" * 70)
+        print("REDACTED TEXT:")
+        print(result["redacted_text"])
+        print("\n" + "=" * 70)
+        print(f"Total entities: {result['total_entities']}")
+        redactor.save_results(result, "data/pii_results.json")
+        print("\n✅ Results saved to data/pii_results.json")

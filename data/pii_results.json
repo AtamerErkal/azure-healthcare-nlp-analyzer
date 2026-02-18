@@ -1,72 +1,31 @@
 {
-  "timestamp": "2026-02-18T15:21:25.570852Z",
-  "original_text": "\nPatient: John Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789.\nAdmitted on January 20, 2024 at Memorial Hospital.\nChief Complaint: Type 2 Diabetes and Hypertension.\nMedications: Metformin 500mg BID, Lisinopril 10mg QD.\nContact: john.smith@email.com, Phone: +1-555-0123.\n",
-  "detected_entities": [
+  "timestamp": "2026-02-18T19:22:41.516340",
+  "original_text": "Annual checkup: Linda Martinez, Age 45, BMI 28.5.\nLabs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.\nRecommendations: Lifestyle modification, recheck in 6 months.\nEmail: lmartinez@email.com, Phone: +1-555-4567.",
+  "medical_entities": [
     {
-      "text": "Patient",
-      "category": "PersonType",
-      "confidence_score": 0.95,
-      "offset": 1,
-      "length": 7
-    },
-    {
-      "text": "John Smith",
+      "text": "Linda Martinez",
       "category": "Person",
       "confidence_score": 1.0,
-      "offset": 10,
-      "length": 10
-    },
-    {
-      "text": "March 15, 1985",
-      "category": "DateTime",
-      "confidence_score": 1.0,
-      "offset": 37,
+      "offset": 16,
       "length": 14
-    },
+    }
+  ],
+  "pii_entities": [
     {
-      "text": "123-45-6789",
-      "category": "USSocialSecurityNumber",
-      "confidence_score": 0.85,
-      "offset": 58,
-      "length": 11
-    },
-    {
-      "text": "January 20, 2024",
-      "category": "DateTime",
-      "confidence_score": 0.99,
-      "offset": 83,
-      "length": 16
-    },
-    {
-      "text": "Chief",
-      "category": "PersonType",
-      "confidence_score": 0.63,
-      "offset": 122,
-      "length": 5
-    },
-    {
-      "text": "john.smith@email.com",
+      "text": "lmartinez@email.com",
       "category": "Email",
       "confidence_score": 0.8,
-      "offset": 236,
-      "length": 20
+      "offset": 172,
+      "length": 19
     },
     {
-      "text": "+1-555-0123",
+      "text": "+1-555-4567",
       "category": "PhoneNumber",
       "confidence_score": 1.0,
-      "offset": 265,
+      "offset": 200,
       "length": 11
     }
   ],
-  "redacted_text": "\n[PersonType]: [Person], Date of Birth: [DateTime], SSN: [USSocialSecurityNumber].\nAdmitted on [DateTime] at Memorial Hospital.\n[PersonType] Complaint: Type 2 Diabetes and Hypertension.\nMedications: Metformin 500mg BID, Lisinopril 10mg QD.\nContact: [Email], Phone: [PhoneNumber].\n",
-  "entity_count": 8,
-  "categories": [
-    "DateTime",
-    "Email",
-    "Person",
-    "PersonType",
-    "PhoneNumber",
-    "USSocialSecurityNumber"
-  ]
+  "total_entities": 3,
+  "redacted_text": "Annual checkup: [PERSON], Age 45, BMI 28.5.\nLabs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.\nRecommendations: Lifestyle modification, recheck in 6 months.\nEmail: [EMAIL], Phone: [PHONE]."
 }

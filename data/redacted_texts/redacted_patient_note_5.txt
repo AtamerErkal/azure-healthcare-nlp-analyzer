@@ -1,4 +1,4 @@
-Annual checkup: [Person], Age [Quantity], BMI [USDriversLicenseNumber].[USDriversLicenseNumber].
-Labs: HbA1c [USDriversLicenseNumber].[USDriversLicenseNumber]% (prediabetic range), LDL [USDriversLicenseNumber] mg/dL.
-Recommendations: Lifestyle [USDriversLicenseNumber], recheck [DateTime].
-Email: [Email], Phone: [PhoneNumber].
+Annual checkup: [PERSON], Age 45, BMI 28.5.
+Labs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.
+Recommendations: Lifestyle modification, recheck in 6 months.
+Email: [EMAIL], Phone: [PHONE].

@@ -1,4 +1,4 @@
-Pt: [Person], SSN: 987-65-4321, Age: [Quantity].
-Diagnosis: Stage 2 COPD, former [PersonType] (30 pack-years).
+Pt: [PERSON], SSN: 987-65-4321, Age: 62.
+Diagnosis: Stage 2 COPD, former smoker (30 pack-years).
 Treatment: Albuterol inhaler PRN, Spiriva 18mcg QD.
-Contact: [Email], [PhoneNumber].
+Contact: [EMAIL], [PHONE].
