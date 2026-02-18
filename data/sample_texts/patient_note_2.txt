@@ -1,0 +1,4 @@
+Pt: Robert Lee, SSN: 987-65-4321, Age: 62.
+Diagnosis: Stage 2 COPD, former smoker (30 pack-years).
+Treatment: Albuterol inhaler PRN, Spiriva 18mcg QD.
+Contact: rlee@email.com, +1-555-9876.

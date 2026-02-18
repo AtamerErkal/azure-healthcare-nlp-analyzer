@@ -1,0 +1,4 @@
+Patient Mary Johnson, DOB: 07/22/1978, MRN: 45678. 
+Chief Complaint: Chest pain. History: HTN, hyperlipidemia.
+Prescribed: Atorvastatin 20mg QD, Aspirin 81mg QD.
+Follow-up: Dr. Anderson, cardiology clinic.

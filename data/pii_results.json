@@ -1,0 +1,72 @@
+{
+  "timestamp": "2026-02-18T15:03:36.215113Z",
+  "original_text": "\nPatient: John Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789.\nAdmitted on January 20, 2024 at Memorial Hospital.\nChief Complaint: Type 2 Diabetes and Hypertension.\nMedications: Metformin 500mg BID, Lisinopril 10mg QD.\nContact: john.smith@email.com, Phone: +1-555-0123.\n",
+  "detected_entities": [
+    {
+      "text": "Patient",
+      "category": "PersonType",
+      "confidence_score": 0.95,
+      "offset": 1,
+      "length": 7
+    },
+    {
+      "text": "John Smith",
+      "category": "Person",
+      "confidence_score": 1.0,
+      "offset": 10,
+      "length": 10
+    },
+    {
+      "text": "March 15, 1985",
+      "category": "DateTime",
+      "confidence_score": 1.0,
+      "offset": 37,
+      "length": 14
+    },
+    {
+      "text": "123-45-6789",
+      "category": "USSocialSecurityNumber",
+      "confidence_score": 0.85,
+      "offset": 58,
+      "length": 11
+    },
+    {
+      "text": "January 20, 2024",
+      "category": "DateTime",
+      "confidence_score": 0.99,
+      "offset": 83,
+      "length": 16
+    },
+    {
+      "text": "Chief",
+      "category": "PersonType",
+      "confidence_score": 0.63,
+      "offset": 122,
+      "length": 5
+    },
+    {
+      "text": "john.smith@email.com",
+      "category": "Email",
+      "confidence_score": 0.8,
+      "offset": 236,
+      "length": 20
+    },
+    {
+      "text": "+1-555-0123",
+      "category": "PhoneNumber",
+      "confidence_score": 1.0,
+      "offset": 265,
+      "length": 11
+    }
+  ],
+  "redacted_text": "\n[PersonType]: [Person], Date of Birth: [DateTime], SSN: [USSocialSecurityNumber].\nAdmitted on [DateTime] at Memorial Hospital.\n[PersonType] Complaint: Type 2 Diabetes and Hypertension.\nMedications: Metformin 500mg BID, Lisinopril 10mg QD.\nContact: [Email], Phone: [PhoneNumber].\n",
+  "entity_count": 8,
+  "categories": [
+    "DateTime",
+    "Email",
+    "Person",
+    "PersonType",
+    "PhoneNumber",
+    "USSocialSecurityNumber"
+  ]
+}

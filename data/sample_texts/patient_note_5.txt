@@ -1,0 +1,4 @@
+Annual checkup: Linda Martinez, Age 45, BMI 28.5.
+Labs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.
+Recommendations: Lifestyle modification, recheck in 6 months.
+Email: lmartinez@email.com, Phone: +1-555-4567.
