@@ -20,8 +20,8 @@ def main() -> None:
     client = TextAnalyticsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
     documents = [
-        "The patient has a history of diabetes and hypertension.",
-        "Prescribed metformin 500mg twice daily.",
+        "The patient has a history of diabetes mellitus type 2 and essential hypertension.",
+        "Prescribed metformin 500mg twice daily and lisinopril 10mg once daily.",
     ]
 
     response = client.recognize_entities(documents)
