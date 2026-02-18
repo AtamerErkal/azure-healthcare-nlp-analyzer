@@ -1,0 +1,4 @@
+[PersonType] [Person], DOB: [DateTime], MRN: 45678. 
+[PersonType] Complaint: Chest pain. History: HTN, hyperlipidemia.
+Prescribed: Atorvastatin 20mg QD, Aspirin 81mg QD.
+Follow-up: [PersonType]. [Person], cardiology clinic.

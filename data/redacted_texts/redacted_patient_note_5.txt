@@ -1,0 +1,4 @@
+Annual checkup: [Person], Age [Quantity], BMI [USDriversLicenseNumber].[USDriversLicenseNumber].
+Labs: HbA1c [USDriversLicenseNumber].[USDriversLicenseNumber]% (prediabetic range), LDL [USDriversLicenseNumber] mg/dL.
+Recommendations: Lifestyle [USDriversLicenseNumber], recheck [DateTime].
+Email: [Email], Phone: [PhoneNumber].

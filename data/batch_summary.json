@@ -1,0 +1,74 @@
+{
+  "timestamp": "2026-02-18T16:26:32.037616",
+  "total_files": 5,
+  "total_pii_found": 28,
+  "files_processed": [
+    {
+      "filename": "patient_note_1.txt",
+      "pii_count": 6,
+      "categories": [
+        "PersonType",
+        "Person",
+        "DateTime",
+        "PersonType",
+        "PersonType",
+        "Person"
+      ]
+    },
+    {
+      "filename": "patient_note_2.txt",
+      "pii_count": 5,
+      "categories": [
+        "Person",
+        "Quantity",
+        "PersonType",
+        "Email",
+        "PhoneNumber"
+      ]
+    },
+    {
+      "filename": "patient_note_3.txt",
+      "pii_count": 3,
+      "categories": [
+        "PersonType",
+        "Person",
+        "DateTime"
+      ]
+    },
+    {
+      "filename": "patient_note_4.txt",
+      "pii_count": 3,
+      "categories": [
+        "Person",
+        "DateTime",
+        "DateTime"
+      ]
+    },
+    {
+      "filename": "patient_note_5.txt",
+      "pii_count": 11,
+      "categories": [
+        "Person",
+        "Quantity",
+        "USDriversLicenseNumber",
+        "USDriversLicenseNumber",
+        "USDriversLicenseNumber",
+        "USDriversLicenseNumber",
+        "USDriversLicenseNumber",
+        "USDriversLicenseNumber",
+        "DateTime",
+        "Email",
+        "PhoneNumber"
+      ]
+    }
+  ],
+  "category_breakdown": {
+    "PersonType": 5,
+    "Person": 6,
+    "DateTime": 5,
+    "Quantity": 2,
+    "Email": 2,
+    "PhoneNumber": 2,
+    "USDriversLicenseNumber": 6
+  }
+}

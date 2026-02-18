@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-18T15:03:36.215113Z",
+  "timestamp": "2026-02-18T15:21:25.570852Z",
   "original_text": "\nPatient: John Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789.\nAdmitted on January 20, 2024 at Memorial Hospital.\nChief Complaint: Type 2 Diabetes and Hypertension.\nMedications: Metformin 500mg BID, Lisinopril 10mg QD.\nContact: john.smith@email.com, Phone: +1-555-0123.\n",
   "detected_entities": [
     {

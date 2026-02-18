@@ -85,6 +85,56 @@ class PIIRedactor:
         with open(filepath, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
+    def process_batch(self, input_dir: str, output_dir: str) -> Dict[str, Any]:
+        """
+        Process multiple text files from input_dir and save redacted versions.
+        """
+        import glob
+
+        files = glob.glob(os.path.join(input_dir, "*.txt"))
+
+        results: Dict[str, Any] = {
+            "timestamp": datetime.now().isoformat(),
+            "total_files": len(files),
+            "total_pii_found": 0,
+            "files_processed": [],
+            "category_breakdown": {},
+        }
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        for filepath in files:
+            filename = os.path.basename(filepath)
+            print(f"\n📄 Processing: {filename}")
+
+            with open(filepath, "r", encoding="utf-8") as f:
+                text = f.read()
+
+            entities = self.detect_pii(text)
+            redacted = self.redact_text(text, entities)
+
+            output_path = os.path.join(output_dir, f"redacted_{filename}")
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(redacted)
+
+            pii_count = len(entities)
+            results["total_pii_found"] += pii_count
+
+            file_result = {
+                "filename": filename,
+                "pii_count": pii_count,
+                "categories": [e["category"] for e in entities],
+            }
+            results["files_processed"].append(file_result)
+
+            for entity in entities:
+                cat = entity["category"]
+                results["category_breakdown"][cat] = results["category_breakdown"].get(cat, 0) + 1
+
+            print(f"  ✅ Found {pii_count} PII entities")
+
+        return results
+
 
 sample_text = """
 Patient: John Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789.
@@ -98,29 +148,55 @@ Contact: john.smith@email.com, Phone: +1-555-0123.
 if __name__ == "__main__":
     try:
         redactor = PIIRedactor()
-        result = redactor.process_document(sample_text)
 
-        print("=" * 60)
-        print("ORIGINAL TEXT:")
-        print(result["original_text"])
+        import sys
 
-        print("\n" + "=" * 60)
-        print("DETECTED PII ENTITIES:")
-        for entity in result["detected_entities"]:
-            print(
-                f"  - {entity['text']} ({entity['category']}) "
-                f"[confidence: {entity['confidence_score']:.2f}]"
+        if len(sys.argv) > 1 and sys.argv[1] == "--batch":
+            print("=" * 60)
+            print("BATCH PROCESSING MODE")
+            print("=" * 60)
+
+            results = redactor.process_batch(
+                input_dir="data/sample_texts",
+                output_dir="data/redacted_texts",
             )
 
-        print("\n" + "=" * 60)
-        print("REDACTED TEXT:")
-        print(result["redacted_text"])
+            print("\n" + "=" * 60)
+            print("BATCH PROCESSING SUMMARY")
+            print("=" * 60)
+            print(f"Total files processed: {results['total_files']}")
+            print(f"Total PII entities found: {results['total_pii_found']}")
+            print(f"\nCategory Breakdown:")
+            for category, count in results["category_breakdown"].items():
+                print(f"  - {category}: {count}")
 
-        print("\n" + "=" * 60)
-        print(f"Total PII entities found: {result['entity_count']}")
-        print(f"Categories: {', '.join(result['categories'])}")
+            redactor.save_results(results, "data/batch_summary.json")
+            print(f"\n✅ Summary saved to data/batch_summary.json")
+            print(f"✅ Redacted files saved to data/redacted_texts/")
+        else:
+            result = redactor.process_document(sample_text)
 
-        redactor.save_results(result, "data/pii_results.json")
-        print("\nResults saved to data/pii_results.json")
+            print("=" * 60)
+            print("ORIGINAL TEXT:")
+            print(result["original_text"])
+
+            print("\n" + "=" * 60)
+            print("DETECTED PII ENTITIES:")
+            for entity in result["detected_entities"]:
+                print(
+                    f"  - {entity['text']} ({entity['category']}) "
+                    f"[confidence: {entity['confidence_score']:.2f}]"
+                )
+
+            print("\n" + "=" * 60)
+            print("REDACTED TEXT:")
+            print(result["redacted_text"])
+
+            print("\n" + "=" * 60)
+            print(f"Total PII entities found: {result['entity_count']}")
+            print(f"Categories: {', '.join(result['categories'])}")
+
+            redactor.save_results(result, "data/pii_results.json")
+            print("\nResults saved to data/pii_results.json")
     except Exception as exc:
         print(f"\nError while running PII redaction: {exc}")

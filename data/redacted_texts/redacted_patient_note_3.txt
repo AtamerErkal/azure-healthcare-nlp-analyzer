@@ -1,0 +1,4 @@
+[PersonType] [Person], admitted [DateTime] to ICU.
+Reason: Acute respiratory failure secondary to pneumonia.
+Vitals: BP 140/90, HR 102, SpO2 88% on room air.
+Orders: Oxygen 4L NC, Ceftriaxone 1g IV Q12H.

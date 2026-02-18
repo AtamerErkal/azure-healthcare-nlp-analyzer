@@ -1,0 +1,4 @@
+Emergency visit: [Person], DOB [DateTime].
+Presenting: Laceration to right forearm, 4cm length.
+Procedure: Wound irrigation, closure with 8 sutures.
+Discharge: Cephalexin 500mg TID x 7 days. Follow-up [DateTime].
