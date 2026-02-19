@@ -40,6 +40,165 @@ Healthcare NLP Analyzer is an intelligent medical text processing system designe
 
 ---
 
+## 🎨 Live Demo
+
+Experience the Healthcare NLP Analyzer through our interactive web interface:
+
+### Interface Overview
+
+![Healthcare NLP Analyzer - Main Interface](docs/demo_screenshot_1.png)
+
+**Left Sidebar - Smart Guidance:**
+- 🎯 What the tool does (extract, protect, preserve)
+- 📋 Step-by-step usage instructions
+- 🔍 Detailed breakdown of detected vs. redacted entities
+- 💡 Real-world use cases (clinical research, data sharing, compliance)
+- 🛠️ Tech stack information
+
+![Analysis Results](docs/demo_screenshot_2.png)
+
+**Center Panel - Real-Time Analysis:**
+- **Original Text** (left): Paste or upload medical documents
+- **Redacted Text** (right): Privacy-protected version instantly generated
+- **Metrics Dashboard**: Total entities, healthcare terms, medical entities (redacted), PII found
+- **One-Click Processing**: Analyze & Redact button triggers Azure AI
+
+![Detected Entities Breakdown](docs/demo_screenshot_3.png)
+
+**Bottom Section - Entity Classification:**
+
+| Category | What's Detected | What Happens | Example |
+|----------|-----------------|--------------|---------|
+| **Healthcare Terms (Preserved)** | Medical terminology, measurements | ✅ **Kept intact** for clinical value | BMI, HbA1c, LDL, Lifestyle modification |
+| **Medical Entities (Redacted)** | Patient identifiers | 🔒 **Replaced with tags** | Linda Martinez → `[PERSON]` |
+| **PII (Contact - Redacted)** | Contact information | 🔒 **Replaced with tags** | lmartinez@email.com → `[EMAIL]` |
+
+### Key Features Demonstrated
+
+**🏥 Healthcare Entity Detection (13+ categories):**
+- ✅ **ExaminationName**: BMI, HbA1c, LDL, HR, BP, Temp
+- ✅ **TreatmentName**: Lifestyle modification, wound irrigation, sutures
+- ✅ **MedicationName**: Cephalexin, Metformin, Lisinopril
+- ✅ **Dosage**: 500mg, 1000mg, 10mg
+- ✅ **Frequency**: TID, BID, QD
+- ✅ **InjuryOrPoisoning**: Laceration
+- ✅ **BodyStructure**: Right forearm
+- ✅ **Diagnosis**: Type 2 Diabetes, Hypertension
+- ✅ **SymptomOrSign**: Chest pain, Migraine
+
+**🔒 Smart PII Redaction:**
+- Patient names → `[PERSON]` (100% confidence)
+- Email addresses → `[EMAIL]` (80-99% confidence)
+- Phone numbers → `[PHONE]` (100% confidence)
+- Social Security Numbers → `[SSN]`
+- Specific dates → `[DATE]` (birth dates, admission dates)
+
+**✅ Medical Data Preservation:**
+- Vital signs: `BP 118/76, HR 82, Temp 36.9°C` → **Preserved**
+- Lab values: `HbA1c 6.2%, LDL 145 mg/dL` → **Preserved**
+- Medications: `Cephalexin 500mg TID x 7 days` → **Preserved**
+- Clinical measurements: `BMI 28.5, Age 45` → **Preserved**
+- Durations: `7 days, 6 months` → **Preserved** (not dates)
+
+### Example Output Comparison
+
+| Input | Output | Entities Detected | Status |
+|-------|--------|-------------------|--------|
+| `Annual checkup: Linda Martinez, Age 45, BMI 28.5` | `Annual checkup: [PERSON], Age 45, BMI 28.5` | Person (100%), BMI (ExaminationName) | ✅ Name redacted, medical data preserved |
+| `Labs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL` | `Labs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL` | HbA1c, LDL (ExaminationName) | ✅ All lab values intact |
+| `Email: lmartinez@email.com, Phone: +1-555-4567` | `Email: [EMAIL], Phone: [PHONE]` | Email (80%), PhoneNumber (100%) | ✅ Contact info redacted |
+| `Discharge: Cephalexin 500mg TID x 7 days` | `Discharge: Cephalexin 500mg TID x 7 days` | MedicationName, Dosage, Frequency | ✅ Prescription details preserved |
+
+### Try It Yourself
+```bash
+# Clone repository
+git clone https://github.com/AtamerErkal/azure-healthcare-nlp-analyzer.git
+cd azure-healthcare-nlp-analyzer
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure Azure credentials
+cp .env.example .env
+# Edit .env with your Azure AI Language endpoint and key
+
+# Launch web interface
+streamlit run ui/streamlit_demo.py
+```
+
+**The interface will open at:** http://localhost:8501
+
+### Batch Processing Support
+
+Upload multiple files at once:
+- ✅ `.txt` files (plain text medical notes)
+- ✅ `.pdf` files (scanned documents, discharge summaries)
+- ✅ `.docx` files (Word documents, clinical reports)
+
+All files are processed individually, and you can download each redacted version.
+
+### Sample Use Cases
+
+**1. Clinical Research:**
+```
+Input: 500 patient records (PDF)
+Output: De-identified dataset ready for analysis
+Result: HIPAA-compliant, shareable research data
+```
+
+**2. Inter-Hospital Data Sharing:**
+```
+Input: Discharge summaries with patient names, contact info
+Output: Redacted summaries with clinical data intact
+Result: Safe collaboration without PHI exposure
+```
+
+**3. ML Training Data Preparation:**
+```
+Input: 10,000 clinical notes (TXT, DOCX)
+Output: Anonymized corpus
+Result: Train NLP models without privacy violations
+```
+
+### Architecture Highlights
+```
+User Input (Medical Text)
+         ↓
+Azure AI Language - Healthcare Text Analytics
+         ↓
+    ┌────────────────────────────┐
+    │   Entity Classification    │
+    └────────────────────────────┘
+         ↓
+    ┌─────────────┬──────────────┬─────────────┐
+    │  Healthcare │   Medical    │     PII     │
+    │   Entities  │   Entities   │   Entities  │
+    │  (Preserve) │  (Redact)    │  (Redact)   │
+    └─────────────┴──────────────┴─────────────┘
+         ↓                ↓              ↓
+    Medications      Person Names    Email/Phone
+    Diagnoses        Dates (DOB)     SSN
+    Lab Values       
+    Vitals           
+         ↓
+    Smart Redaction Engine
+         ↓
+    Redacted Text + JSON Report + Downloadable Files
+```
+
+### Performance Metrics (From Demo)
+
+**Example: Annual Checkup Note**
+- **Total Processing Time**: ~2.1 seconds
+- **Total Entities Detected**: 8
+  - Healthcare Terms: 5 (BMI, HbA1c, LDL, Lifestyle modification, recheck)
+  - Medical Entities: 1 (Linda Martinez - Person)
+  - PII: 2 (Email, Phone)
+- **Redaction Accuracy**: 100%
+- **Clinical Data Preservation**: 100%
+
+---
+
 ## 📊 Performance Metrics
 ```
 Processing Speed:    ~0.3s per document
