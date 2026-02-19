@@ -19,61 +19,84 @@ class PIIRedactor:
 
         self.client = TextAnalyticsClient(endpoint=endpoint, credential=AzureKeyCredential(key))
 
+    def detect_healthcare_entities(self, text: str) -> list:
+        """
+        Detect healthcare-specific entities using Text Analytics for Health.
+        Categories: MedicationName, Dosage, Diagnosis, BodyStructure, etc.
+        """
+        try:
+            poller = self.client.begin_analyze_healthcare_entities(documents=[text])
+            result = poller.result()
+
+            entities: list = []
+            for doc in result:
+                if getattr(doc, "is_error", False):
+                    continue
+                for entity in doc.entities:
+                    if entity.category in [
+                        "MedicationName",
+                        "Dosage",
+                        "Diagnosis",
+                        "SymptomOrSign",
+                        "TreatmentName",
+                        "ExaminationName",
+                        "BodyStructure",
+                        "MedicationClass",
+                        "Frequency",
+                        "RouteOrMode",
+                        "ConditionQualifier",
+                    ]:
+                        entities.append({
+                            "text": entity.text,
+                            "category": entity.category,
+                            "confidence_score": float(getattr(entity, "confidence_score", 1.0)),
+                            "offset": int(entity.offset),
+                            "length": int(entity.length),
+                        })
+            return entities
+        except Exception as e:
+            print(f"Healthcare entity detection error: {e}")
+            return []
+
     def detect_medical_entities(self, text: str) -> list:
         """
-        Detect medical entities (names, locations, organizations, specific dates).
+        Detect person names and dates using general NER (for PII redaction).
         """
         try:
             response = self.client.recognize_entities(documents=[text], language="en")
             entities: list = []
-
             for doc in response:
                 if getattr(doc, "is_error", False):
                     continue
-
                 for entity in doc.entities:
                     if entity.category == "Person":
-                        entities.append(
-                            {
-                                "text": entity.text,
-                                "category": entity.category,
-                                "confidence_score": float(entity.confidence_score),
-                                "offset": int(entity.offset),
-                                "length": int(entity.length),
-                            }
-                        )
-                    elif entity.category == "Location":
-                        entities.append(
-                            {
-                                "text": entity.text,
-                                "category": entity.category,
-                                "confidence_score": float(entity.confidence_score),
-                                "offset": int(entity.offset),
-                                "length": int(entity.length),
-                            }
-                        )
-                    elif entity.category == "Organization":
-                        entities.append(
-                            {
-                                "text": entity.text,
-                                "category": entity.category,
-                                "confidence_score": float(entity.confidence_score),
-                                "offset": int(entity.offset),
-                                "length": int(entity.length),
-                            }
-                        )
+                        entities.append({
+                            "text": entity.text,
+                            "category": entity.category,
+                            "confidence_score": float(entity.confidence_score),
+                            "offset": int(entity.offset),
+                            "length": int(entity.length),
+                        })
                     elif entity.category == "DateTime":
-                        if entity.confidence_score > 0.95 and any(char.isdigit() for char in entity.text):
-                            entities.append(
-                                {
-                                    "text": entity.text,
-                                    "category": entity.category,
-                                    "confidence_score": float(entity.confidence_score),
-                                    "offset": int(entity.offset),
-                                    "length": int(entity.length),
-                                }
-                            )
-
+                        # Only keep specific dates (with numbers), not durations or words like "Annual"
+                        text_lower = entity.text.lower()
+                        duration_patterns = [
+                            "day", "days", "week", "weeks", "month", "months",
+                            "year", "years", "hour", "hours", "minute", "minutes",
+                        ]
+                        is_duration = any(pattern in text_lower for pattern in duration_patterns)
+                        if (
+                            entity.confidence_score > 0.95
+                            and any(char.isdigit() for char in entity.text)
+                            and not is_duration
+                        ):
+                            entities.append({
+                                "text": entity.text,
+                                "category": entity.category,
+                                "confidence_score": float(entity.confidence_score),
+                                "offset": int(entity.offset),
+                                "length": int(entity.length),
+                            })
             return entities
         except Exception as exc:
             print(f"Error in medical entity detection: {exc}")
@@ -154,6 +177,7 @@ class PIIRedactor:
         return redacted
 
     def process_document(self, text: str) -> dict:
+        healthcare_entities = self.detect_healthcare_entities(text)
         medical_entities = self.detect_medical_entities(text)
         pii_entities = self.detect_contact_pii(text)
         redacted_text = self.redact_text(text, medical_entities, pii_entities)
@@ -161,9 +185,10 @@ class PIIRedactor:
         return {
             "timestamp": datetime.now().isoformat(),
             "original_text": text,
+            "healthcare_entities": healthcare_entities,
             "medical_entities": medical_entities,
             "pii_entities": pii_entities,
-            "total_entities": len(medical_entities) + len(pii_entities),
+            "total_entities": len(healthcare_entities) + len(medical_entities) + len(pii_entities),
             "redacted_text": redacted_text,
         }
 
@@ -204,7 +229,11 @@ class PIIRedactor:
             entity_count = doc_result["total_entities"]
             results["total_entities"] += entity_count
 
-            all_entities = doc_result["medical_entities"] + doc_result["pii_entities"]
+            all_entities = (
+                doc_result["healthcare_entities"]
+                + doc_result["medical_entities"]
+                + doc_result["pii_entities"]
+            )
 
             file_result = {
                 "filename": filename,
@@ -265,7 +294,11 @@ Email: lmartinez@email.com, Phone: +1-555-4567."""
         print("ORIGINAL TEXT:")
         print(result["original_text"])
         print("\n" + "=" * 70)
-        print("DETECTED MEDICAL ENTITIES:")
+        print("DETECTED HEALTHCARE ENTITIES:")
+        for entity in result["healthcare_entities"]:
+            print(f"  - {entity['text']} ({entity['category']}) [confidence: {entity['confidence_score']:.2f}]")
+        print("\n" + "=" * 70)
+        print("DETECTED MEDICAL ENTITIES (For Redaction):")
         for entity in result["medical_entities"]:
             print(f"  - {entity['text']} ({entity['category']}) [confidence: {entity['confidence_score']:.2f}]")
         print("\n" + "=" * 70)

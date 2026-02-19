@@ -1,6 +1,43 @@
 {
-  "timestamp": "2026-02-18T19:22:41.516340",
+  "timestamp": "2026-02-19T07:46:50.137387",
   "original_text": "Annual checkup: Linda Martinez, Age 45, BMI 28.5.\nLabs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.\nRecommendations: Lifestyle modification, recheck in 6 months.\nEmail: lmartinez@email.com, Phone: +1-555-4567.",
+  "healthcare_entities": [
+    {
+      "text": "BMI",
+      "category": "ExaminationName",
+      "confidence_score": 1.0,
+      "offset": 40,
+      "length": 3
+    },
+    {
+      "text": "HbA1c",
+      "category": "ExaminationName",
+      "confidence_score": 1.0,
+      "offset": 56,
+      "length": 5
+    },
+    {
+      "text": "LDL",
+      "category": "ExaminationName",
+      "confidence_score": 1.0,
+      "offset": 88,
+      "length": 3
+    },
+    {
+      "text": "Lifestyle modification",
+      "category": "TreatmentName",
+      "confidence_score": 0.99,
+      "offset": 120,
+      "length": 22
+    },
+    {
+      "text": "recheck",
+      "category": "ExaminationName",
+      "confidence_score": 0.62,
+      "offset": 144,
+      "length": 7
+    }
+  ],
   "medical_entities": [
     {
       "text": "Linda Martinez",
@@ -26,6 +63,6 @@
       "length": 11
     }
   ],
-  "total_entities": 3,
+  "total_entities": 8,
   "redacted_text": "Annual checkup: [PERSON], Age 45, BMI 28.5.\nLabs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.\nRecommendations: Lifestyle modification, recheck in 6 months.\nEmail: [EMAIL], Phone: [PHONE]."
 }

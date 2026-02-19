@@ -126,6 +126,13 @@ print(f"Detected {result['entity_count']} PII entities")
 print(f"Redacted: {result['redacted_text']}")
 ```
 
+### Web interface (Streamlit)
+```bash
+# From project root (use -m to avoid "Unable to create process" launcher errors)
+python -m streamlit run ui/streamlit_demo.py
+```
+On Windows you can instead run `run_streamlit.bat`. If `streamlit run ...` fails with "The system cannot find the file specified", your PATH may be using a different Python's launcher—always use `python -m streamlit run ui/streamlit_demo.py`.
+
 ### Batch Processing
 ```bash
 # Process all files in data/sample_texts/
