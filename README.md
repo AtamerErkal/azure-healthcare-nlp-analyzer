@@ -55,6 +55,8 @@ Experience the Healthcare NLP Analyzer through our interactive web interface:
 - 💡 Real-world use cases (clinical research, data sharing, compliance)
 - 🛠️ Tech stack information
 
+---
+
 ![Analysis Results](docs/demo_screenshot_2.png)
 
 **Center Panel - Real-Time Analysis:**
@@ -62,6 +64,8 @@ Experience the Healthcare NLP Analyzer through our interactive web interface:
 - **Redacted Text** (right): Privacy-protected version instantly generated
 - **Metrics Dashboard**: Total entities, healthcare terms, medical entities (redacted), PII found
 - **One-Click Processing**: Analyze & Redact button triggers Azure AI
+
+---
 
 ![Detected Entities Breakdown](docs/demo_screenshot_3.png)
 
