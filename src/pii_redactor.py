@@ -198,57 +198,111 @@ class PIIRedactor:
             json.dump(results, f, indent=2)
 
     def process_batch(self, input_dir: str, output_dir: str) -> dict:
-        """Process multiple text files"""
-        files = glob.glob(os.path.join(input_dir, "*.txt"))
-
+        """
+        Process multiple files (TXT, PDF, DOCX)
+        """
+        import glob
+        
+        # Support multiple file types
+        file_patterns = [
+            os.path.join(input_dir, "*.txt"),
+            os.path.join(input_dir, "*.pdf"),
+            os.path.join(input_dir, "*.docx")
+        ]
+        
+        files = []
+        for pattern in file_patterns:
+            files.extend(glob.glob(pattern))
+        
         results = {
             "timestamp": datetime.now().isoformat(),
             "total_files": len(files),
             "total_entities": 0,
             "files_processed": [],
-            "category_breakdown": {}
+            "category_breakdown": {},
+            "errors": []
         }
-
+        
         os.makedirs(output_dir, exist_ok=True)
-
+        
         for filepath in files:
             filename = os.path.basename(filepath)
+            file_ext = os.path.splitext(filename)[1].lower()
+            
             print(f"\n📄 Processing: {filename}")
-
-            with open(filepath, 'r', encoding='utf-8') as f:
-                text = f.read()
-
-            doc_result = self.process_document(text)
-
-            # Save redacted file
-            output_path = os.path.join(output_dir, f"redacted_{filename}")
-            with open(output_path, 'w', encoding='utf-8') as f:
-                f.write(doc_result["redacted_text"])
-
-            # Update statistics
-            entity_count = doc_result["total_entities"]
-            results["total_entities"] += entity_count
-
-            all_entities = (
-                doc_result["healthcare_entities"]
-                + doc_result["medical_entities"]
-                + doc_result["pii_entities"]
-            )
-
-            file_result = {
-                "filename": filename,
-                "entity_count": entity_count,
-                "categories": [e["category"] for e in all_entities]
-            }
-            results["files_processed"].append(file_result)
-
-            # Count categories
-            for entity in all_entities:
-                cat = entity["category"]
-                results["category_breakdown"][cat] = results["category_breakdown"].get(cat, 0) + 1
-
-            print(f"  ✅ Found {entity_count} entities")
-
+            
+            try:
+                # Read file based on type
+                if file_ext == '.txt':
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        text = f.read()
+                
+                elif file_ext == '.pdf':
+                    try:
+                        import PyPDF2
+                        with open(filepath, 'rb') as f:
+                            reader = PyPDF2.PdfReader(f)
+                            text = ""
+                            for page in reader.pages:
+                                text += page.extract_text()
+                    except ImportError:
+                        print("  ⚠️ PyPDF2 not installed. Run: pip install PyPDF2")
+                        results["errors"].append(f"{filename}: PyPDF2 not installed")
+                        continue
+                
+                elif file_ext == '.docx':
+                    try:
+                        import docx
+                        doc = docx.Document(filepath)
+                        text = "\n".join([para.text for para in doc.paragraphs])
+                    except ImportError:
+                        print("  ⚠️ python-docx not installed. Run: pip install python-docx")
+                        results["errors"].append(f"{filename}: python-docx not installed")
+                        continue
+                
+                else:
+                    print(f"  ⚠️ Unsupported file type: {file_ext}")
+                    results["errors"].append(f"{filename}: Unsupported file type")
+                    continue
+                
+                # Process document
+                doc_result = self.process_document(text)
+                
+                # Save redacted file
+                base_name = os.path.splitext(filename)[0]
+                output_path = os.path.join(output_dir, f"{base_name}_REDACTED.txt")
+                with open(output_path, 'w', encoding='utf-8') as f:
+                    f.write(doc_result["redacted_text"])
+                
+                # Update statistics
+                entity_count = doc_result["total_entities"]
+                results["total_entities"] += entity_count
+                
+                all_entities = (
+                    doc_result.get("healthcare_entities", []) + 
+                    doc_result.get("medical_entities", []) + 
+                    doc_result.get("pii_entities", [])
+                )
+                
+                file_result = {
+                    "filename": filename,
+                    "file_type": file_ext,
+                    "entity_count": entity_count,
+                    "categories": [e["category"] for e in all_entities]
+                }
+                results["files_processed"].append(file_result)
+                
+                # Count categories
+                for entity in all_entities:
+                    cat = entity["category"]
+                    results["category_breakdown"][cat] = results["category_breakdown"].get(cat, 0) + 1
+                
+                print(f"  ✅ Found {entity_count} entities")
+            
+            except Exception as e:
+                print(f"  ❌ Error processing {filename}: {e}")
+                results["errors"].append(f"{filename}: {str(e)}")
+        
         return results
 
 

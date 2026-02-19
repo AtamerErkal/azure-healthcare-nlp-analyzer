@@ -12,8 +12,37 @@ st.set_page_config(
     layout="wide"
 )
 
+# IMPROVED CSS - Dark mode sidebar + better contrast
 st.markdown("""
 <style>
+    /* Force dark background for sidebar */
+    [data-testid="stSidebar"] {
+        background-color: #1e1e1e !important;
+    }
+    
+    /* Sidebar text styling */
+    [data-testid="stSidebar"] .element-container {
+        color: #ffffff !important;
+    }
+    
+    [data-testid="stSidebar"] h1,
+    [data-testid="stSidebar"] h2,
+    [data-testid="stSidebar"] h3 {
+        color: #4CAF50 !important;
+    }
+    
+    [data-testid="stSidebar"] .stMarkdown {
+        color: #e0e0e0 !important;
+    }
+    
+    /* Info/Success boxes in sidebar */
+    [data-testid="stSidebar"] .stAlert {
+        background-color: #2d2d2d !important;
+        color: #ffffff !important;
+        border: 1px solid #4CAF50 !important;
+    }
+    
+    /* Main content styling */
     .main-header {
         font-size: 3rem;
         font-weight: bold;
@@ -21,23 +50,31 @@ st.markdown("""
         text-align: center;
         margin-bottom: 1rem;
     }
+    
     .sub-header {
         font-size: 1.2rem;
-        color: #666;
+        color: #888;
         text-align: center;
         margin-bottom: 2rem;
     }
+    
+    /* Entity boxes */
     .entity-box {
-        padding: 0.5rem;
+        padding: 0.8rem;
         border-radius: 5px;
-        margin: 0.3rem 0;
+        margin: 0.4rem 0;
+        background-color: #2d2d2d;
+        border-left: 4px solid #4CAF50;
+        color: #ffffff;
     }
+    
     .medical-entity {
-        background-color: #e3f2fd;
+        background-color: #1a237e;
         border-left: 4px solid #1976d2;
     }
+    
     .pii-entity {
-        background-color: #ffebee;
+        background-color: #4a1515;
         border-left: 4px solid #d32f2f;
     }
 </style>
@@ -54,33 +91,73 @@ if 'redactor' not in st.session_state:
         st.error(f"Failed to initialize: {e}")
         st.stop()
 
+# IMPROVED SIDEBAR
 with st.sidebar:
     st.title("ℹ️ About")
+    
+    st.markdown("### 🎯 What Is This?")
     st.info("""
-**Healthcare NLP Analyzer** uses Azure AI Language to intelligently process medical text.
+**Healthcare NLP Analyzer** automatically processes medical text to:
 
-**What Gets Preserved:**
-✅ Vital signs (BP, HR, Temp, SpO2)
-✅ Lab values (HbA1c, LDL, WBC, CRP)
-✅ Medications and dosages
-✅ Clinical measurements (BMI, weight)
-✅ Medical terminology
-
-**What Gets Redacted:**
-🔒 Patient names
-🔒 Email addresses
-🔒 Phone numbers
-🔒 Social Security Numbers
-🔒 Specific dates (preserved as [DATE])
+✅ **Extract** clinical information (medications, diagnoses, vitals)  
+✅ **Protect** patient privacy (redact names, contact info)  
+✅ **Preserve** medical data (lab values, measurements)
     """)
-
+    
     st.markdown("---")
-    st.markdown("**Tech Stack:**")
-    st.markdown("- Azure AI Language")
-    st.markdown("- Python 3.10")
-    st.markdown("- Streamlit")
+    st.markdown("### 📋 How To Use")
+    st.success("""
+1. **Upload or paste** medical text (clinical notes, discharge summaries)
+2. **Click "Analyze"** — AI processes in real-time
+3. **Review results** — see detected entities and redacted text
+4. **Download** redacted version for safe sharing
+    """)
+    
     st.markdown("---")
-    st.markdown("**GitHub:** [View Project](https://github.com/AtamerErkal/azure-healthcare-nlp-analyzer)")
+    st.markdown("### 🔍 What AI Detects")
+    
+    st.markdown("**🏥 Healthcare Terms (Preserved):**")
+    st.markdown("""
+- 💊 Medications & dosages
+- 🩺 Diagnoses & symptoms
+- 📊 Vital signs & lab values
+- 🦴 Body parts & anatomy
+- 💉 Treatments & procedures
+    """)
+    
+    st.markdown("**🔒 PII (Redacted):**")
+    st.markdown("""
+- 👤 Patient names → `[PERSON]`
+- 📧 Email addresses → `[EMAIL]`
+- 📞 Phone numbers → `[PHONE]`
+- 🆔 SSN/IDs → `[SSN]`
+- 📅 Specific dates → `[DATE]`
+    """)
+    
+    st.markdown("---")
+    st.markdown("### 💡 Use Cases")
+    st.markdown("""
+- **Clinical Research:** De-identify patient records
+- **Data Sharing:** Remove PHI for collaboration
+- **Quality Assurance:** Review clinical documentation
+- **Training Data:** Prepare datasets for ML models
+- **Compliance:** HIPAA-ready redaction
+    """)
+    
+    st.markdown("---")
+    st.markdown("### 🛠️ Tech Stack")
+    st.markdown("""
+- **Azure AI Language** (Healthcare Text Analytics)
+- **Python 3.10**
+- **Streamlit** (Web UI)
+    """)
+    
+    st.markdown("---")
+    st.markdown("### 🔗 Links")
+    st.markdown("""
+- [GitHub Repository](https://github.com/AtamerErkal/azure-healthcare-nlp-analyzer)
+- [Azure AI Docs](https://learn.microsoft.com/en-us/azure/ai-services/language-service/)
+    """)
 
 tab1, tab2, tab3 = st.tabs(["📝 Analyze Text", "📊 Batch Upload", "📖 Examples"])
 
@@ -136,14 +213,14 @@ Contact: sjohnson@email.com, +1-555-1234""",
             ent_col1, ent_col2, ent_col3 = st.columns(3)
 
             with ent_col1:
-                st.markdown("**Healthcare Terms:**")
+                st.markdown("**Healthcare Terms (Preserved):**")
                 if result["healthcare_entities"]:
                     for e in result["healthcare_entities"]:
                         st.markdown(
                             f'<div class="entity-box medical-entity">'
                             f'<strong>{e["text"]}</strong> '
-                            f'<span style="color: #1976d2;">({e["category"]})</span> '
-                            f'<span style="color: #666;">Confidence: {e["confidence_score"]:.0%}</span>'
+                            f'<span style="color: #64B5F6;">({e["category"]})</span> '
+                            f'<span style="color: #BDBDBD;">Confidence: {e["confidence_score"]:.0%}</span>'
                             f'</div>',
                             unsafe_allow_html=True
                         )
@@ -157,8 +234,8 @@ Contact: sjohnson@email.com, +1-555-1234""",
                         st.markdown(
                             f'<div class="entity-box medical-entity">'
                             f'<strong>{e["text"]}</strong> '
-                            f'<span style="color: #1976d2;">({e["category"]})</span> '
-                            f'<span style="color: #666;">Confidence: {e["confidence_score"]:.0%}</span>'
+                            f'<span style="color: #64B5F6;">({e["category"]})</span> '
+                            f'<span style="color: #BDBDBD;">Confidence: {e["confidence_score"]:.0%}</span>'
                             f'</div>',
                             unsafe_allow_html=True
                         )
@@ -166,14 +243,14 @@ Contact: sjohnson@email.com, +1-555-1234""",
                     st.info("No medical entities detected")
 
             with ent_col3:
-                st.markdown("**PII (Contact Info - Redacted):**")
+                st.markdown("**PII (Contact - Redacted):**")
                 if result["pii_entities"]:
                     for e in result["pii_entities"]:
                         st.markdown(
                             f'<div class="entity-box pii-entity">'
                             f'<strong>{e["text"]}</strong> '
-                            f'<span style="color: #d32f2f;">({e["category"]})</span> '
-                            f'<span style="color: #666;">Confidence: {e["confidence_score"]:.0%}</span>'
+                            f'<span style="color: #EF5350;">({e["category"]})</span> '
+                            f'<span style="color: #BDBDBD;">Confidence: {e["confidence_score"]:.0%}</span>'
                             f'</div>',
                             unsafe_allow_html=True
                         )
@@ -205,40 +282,84 @@ Contact: sjohnson@email.com, +1-555-1234""",
         else:
             st.warning("⚠️ Please enter some text to analyze.")
 
+# IMPROVED BATCH TAB - PDF + DOCX support
 with tab2:
-    st.subheader("📊 Batch Upload")
-    st.markdown("Upload one or more `.txt` files to redact in batch. Each file is processed and you can download the redacted versions.")
+    st.subheader("📊 Batch Processing")
+    st.markdown("Upload multiple files (`.txt`, `.pdf`, `.docx`) to process in batch. Each file is analyzed and you can download redacted versions.")
+    
     uploaded_files = st.file_uploader(
-        "Choose .txt files",
-        type=["txt"],
+        "Choose files",
+        type=["txt", "pdf", "docx"],
         accept_multiple_files=True,
         label_visibility="collapsed"
     )
+    
     if uploaded_files:
         if st.button("🔄 Process All Files", type="primary", use_container_width=True):
             batch_results = []
             progress = st.progress(0)
+            
             for i, f in enumerate(uploaded_files):
-                text = f.read().decode("utf-8")
-                doc_result = st.session_state.redactor.process_document(text)
-                batch_results.append({
-                    "filename": f.name,
-                    "result": doc_result,
-                })
+                try:
+                    # Read based on file type
+                    if f.name.endswith('.txt'):
+                        text = f.read().decode("utf-8")
+                    
+                    elif f.name.endswith('.pdf'):
+                        try:
+                            import PyPDF2
+                            from io import BytesIO
+                            pdf_reader = PyPDF2.PdfReader(BytesIO(f.read()))
+                            text = ""
+                            for page in pdf_reader.pages:
+                                text += page.extract_text()
+                        except ImportError:
+                            st.error("PyPDF2 not installed. Run: `pip install PyPDF2`")
+                            continue
+                    
+                    elif f.name.endswith('.docx'):
+                        try:
+                            import docx
+                            from io import BytesIO
+                            doc = docx.Document(BytesIO(f.read()))
+                            text = "\n".join([para.text for para in doc.paragraphs])
+                        except ImportError:
+                            st.error("python-docx not installed. Run: `pip install python-docx`")
+                            continue
+                    
+                    else:
+                        st.warning(f"Unsupported file type: {f.name}")
+                        continue
+                    
+                    doc_result = st.session_state.redactor.process_document(text)
+                    batch_results.append({
+                        "filename": f.name,
+                        "result": doc_result,
+                    })
+                
+                except Exception as e:
+                    st.error(f"Error processing {f.name}: {e}")
+                
                 progress.progress((i + 1) / len(uploaded_files))
+            
             progress.empty()
 
             st.success(f"Processed {len(batch_results)} file(s).")
             total_entities = sum(r["result"]["total_entities"] for r in batch_results)
-            st.metric("Total entities redacted (all files)", total_entities)
+            st.metric("Total entities detected (all files)", total_entities)
 
             for r in batch_results:
                 with st.expander(f"📄 {r['filename']} — {r['result']['total_entities']} entities"):
                     st.text_area("Redacted text", value=r["result"]["redacted_text"], height=200, label_visibility="collapsed")
+                    
+                    # Separate filename and extension
+                    name_parts = r['filename'].rsplit('.', 1)
+                    base_name = name_parts[0]
+                    
                     st.download_button(
-                        label=f"📥 Download redacted_{r['filename']}",
+                        label=f"📥 Download {base_name}_REDACTED.txt",
                         data=r["result"]["redacted_text"],
-                        file_name=f"redacted_{r['filename']}",
+                        file_name=f"{base_name}_REDACTED.txt",
                         mime="text/plain",
                         key=f"dl_{r['filename']}"
                     )
