@@ -157,13 +157,30 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# HEADER - FIXED ICON!
+import base64
+
+def get_icon_base64():
+    """Load local icon and convert to base64"""
+    icon_path = os.path.join(os.path.dirname(__file__), "..", "docs", "healthcare_icon.png")
+    
+    # If local icon doesn't exist, use fallback
+    if not os.path.exists(icon_path):
+        # Return empty string to use fallback icon
+        return ""
+    
+    try:
+        with open(icon_path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except:
+        return ""
+
+# HEADER - LOCAL ICON!
 st.markdown("""
 <div style='text-align: center; margin-bottom: 1rem;'>
-    <img src='https://img.icons8.com/fluency/96/medical-history.png' width='80' style='vertical-align: middle; margin-right: 1rem;'>
+    <img src='data:image/png;base64,{icon_base64}' width='80' style='vertical-align: middle; margin-right: 1rem;'>
     <span style='font-size: 3.5rem; font-weight: 800; background: linear-gradient(90deg, #4CAF50, #2196F3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; vertical-align: middle;'>Healthcare NLP Analyzer</span>
 </div>
-""", unsafe_allow_html=True)
+""".format(icon_base64=get_icon_base64()), unsafe_allow_html=True)
 
 st.markdown('<div class="sub-header">Advanced Medical Text Processing Platform</div>', unsafe_allow_html=True)
 
@@ -383,37 +400,44 @@ Contact: sjohnson@email.com, +1-555-1234""",
                 )
 
             with col_entities:
-                st.markdown("**🏷️ Entity Legend:**")
+                st.markdown("**🏷️ Detected Entities:**")
                 
-                # Healthcare entities legend
-                st.markdown("**Healthcare Terms:**")
-                for entity in result["healthcare_entities"][:5]:  # Show first 5
-                    color = healthcare_colors.get(entity['category'], '#4CAF50')
-                    st.markdown(
-                        f'<div style="background-color: {color}; padding: 0.3rem 0.6rem; border-radius: 4px; margin: 0.2rem 0; font-size: 0.85rem;">'
-                        f'{entity["category"]}'
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
+                # Show ALL entities with their colors (like redacted text)
                 
-                st.markdown("**Medical Entities:**")
-                for entity in result["medical_entities"][:3]:
-                    color = medical_colors.get(entity['category'], '#1976D2')
-                    st.markdown(
-                        f'<div style="background-color: {color}; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; margin: 0.2rem 0; font-size: 0.85rem;">'
-                        f'{entity["category"]}'
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
+                # Healthcare entities
+                if result["healthcare_entities"]:
+                    st.markdown("**Healthcare Terms:**")
+                    for entity in result["healthcare_entities"]:
+                        color = healthcare_colors.get(entity['category'], '#4CAF50')
+                        st.markdown(
+                            f'<div style="background-color: {color}; padding: 0.4rem 0.7rem; border-radius: 5px; margin: 0.3rem 0; font-size: 0.9rem; font-weight: bold; color: white;">'
+                            f'{entity["text"]}'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
                 
-                st.markdown("**PII (Redacted):**")
-                for entity in result["pii_entities"][:3]:
-                    st.markdown(
-                        f'<div style="background-color: #D32F2F; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; margin: 0.2rem 0; font-size: 0.85rem;">'
-                        f'{entity["category"]}'
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
+                # Medical entities
+                if result["medical_entities"]:
+                    st.markdown("**Medical Entities:**")
+                    for entity in result["medical_entities"]:
+                        color = medical_colors.get(entity['category'], '#1976D2')
+                        st.markdown(
+                            f'<div style="background-color: {color}; color: white; padding: 0.4rem 0.7rem; border-radius: 5px; margin: 0.3rem 0; font-size: 0.9rem; font-weight: bold;">'
+                            f'{entity["text"]}'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
+                
+                # PII entities
+                if result["pii_entities"]:
+                    st.markdown("**PII (Redacted):**")
+                    for entity in result["pii_entities"]:
+                        st.markdown(
+                            f'<div style="background-color: #D32F2F; color: white; padding: 0.4rem 0.7rem; border-radius: 5px; margin: 0.3rem 0; font-size: 0.9rem; font-weight: bold;">'
+                            f'{entity["text"]}'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
 
             # Metrics row
             st.markdown("---")
