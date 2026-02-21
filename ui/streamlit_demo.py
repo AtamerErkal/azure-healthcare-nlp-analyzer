@@ -158,7 +158,25 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 st.markdown('<div class="main-header">🏥 Healthcare NLP Analyzer</div>', unsafe_allow_html=True)
-st.markdown('<div class="sub-header">AI-Powered Medical Text Processing • Translation • Voice Transcription</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-header">Advanced Medical Text Processing Platform</div>', unsafe_allow_html=True)
+
+# Add feature badges
+st.markdown("""
+<div style='text-align: center; margin-bottom: 2rem;'>
+    <span style='background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 0.5rem 1rem; border-radius: 20px; margin: 0.3rem; display: inline-block; color: white;'>
+        🔍 PII Detection & Redaction
+    </span>
+    <span style='background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 0.5rem 1rem; border-radius: 20px; margin: 0.3rem; display: inline-block; color: white;'>
+        🌐 Medical Translation (7 Languages)
+    </span>
+    <span style='background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 0.5rem 1rem; border-radius: 20px; margin: 0.3rem; display: inline-block; color: white;'>
+        🎤 Voice-to-Text Transcription
+    </span>
+    <span style='background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 0.5rem 1rem; border-radius: 20px; margin: 0.3rem; display: inline-block; color: white;'>
+        🔐 Azure Key Vault Security
+    </span>
+</div>
+""", unsafe_allow_html=True)
 
 # Initialize services
 if 'redactor' not in st.session_state:
@@ -384,81 +402,102 @@ Contact: sjohnson@email.com, +1-555-1234""",
             st.warning("⚠️ Please enter medical text to analyze")
 
 # ============================================================================
-# TAB 2: TRANSLATE (NEW!)
+# TAB 2: TRANSLATE (ENHANCED WITH 7 LANGUAGES!)
 # ============================================================================
 with tab2:
     st.subheader("🌐 Medical Text Translation")
-    st.markdown("Translate medical content to 100+ languages with context-aware AI")
+    
+    # Enhanced description
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;'>
+        <h4 style='color: white; margin: 0;'>🎯 Translation Features:</h4>
+        <ul style='color: #E0E0E0; margin-top: 0.5rem;'>
+            <li><strong>7 Languages Supported:</strong> English, Turkish, German, French, Spanish, Arabic, Italian</li>
+            <li><strong>Medical Context-Aware:</strong> Preserves medical terminology accuracy</li>
+            <li><strong>Instant Translation:</strong> Real-time Azure Translator API</li>
+            <li><strong>Bidirectional:</strong> Translate from/to any supported language</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([2, 1])
     
     with col1:
+        default_translate_text = st.session_state.get('quick_translate_text', '')
+        
         translate_input = st.text_area(
             "Enter medical text to translate:",
             height=200,
-            placeholder="Example: Patient has Type 2 Diabetes and hypertension. Prescribed Metformin 500mg twice daily.",
-            key="translate_input"
+            value=default_translate_text,
+            placeholder="Example: Patient diagnosed with Type 2 Diabetes Mellitus and essential hypertension. Prescribed Metformin 500mg BID."
         )
     
     with col2:
-        st.markdown("**Translation Settings:**")
+        st.markdown("**🔧 Translation Settings:**")
+        
+        languages = [
+            ("🇬🇧 English", "en"),
+            ("🇹🇷 Turkish", "tr"),
+            ("🇩🇪 German", "de"),
+            ("🇫🇷 French", "fr"),
+            ("🇪🇸 Spanish", "es"),
+            ("🇸🇦 Arabic", "ar"),
+            ("🇮🇹 Italian", "it")
+        ]
         
         from_lang = st.selectbox(
             "From Language:",
-            options=[
-                ("🇬🇧 English", "en"),
-                ("🇹🇷 Turkish", "tr"),
-                ("🇩🇪 German", "de"),
-                ("🇫🇷 French", "fr"),
-                ("🇪🇸 Spanish", "es")
-            ],
+            options=languages,
             format_func=lambda x: x[0],
             index=0
         )
         
         to_lang = st.selectbox(
             "To Language:",
-            options=[
-                ("🇹🇷 Turkish", "tr"),
-                ("🇩🇪 German", "de"),
-                ("🇫🇷 French", "fr"),
-                ("🇪🇸 Spanish", "es"),
-                ("🇬🇧 English", "en")
-            ],
+            options=languages,
             format_func=lambda x: x[0],
-            index=0
+            index=1  # Default to Turkish
         )
     
     if st.button("🌐 Translate", type="primary", use_container_width=True):
         if translate_input.strip():
-            with st.spinner("🔄 Translating with Azure Translator..."):
-                translated = st.session_state.translator.translate(
-                    translate_input,
-                    from_lang=from_lang[1],
-                    to_lang=to_lang[1]
+            if from_lang[1] == to_lang[1]:
+                st.warning("⚠️ Source and target languages are the same. Please select different languages.")
+            else:
+                with st.spinner("🔄 Translating with Azure Translator..."):
+                    translated = st.session_state.translator.translate(
+                        translate_input,
+                        from_lang=from_lang[1],
+                        to_lang=to_lang[1]
+                    )
+                
+                st.markdown("---")
+                st.markdown(
+                    f'<div class="translation-box">'
+                    f'<h3>{to_lang[0]} Translation:</h3>'
+                    f'<p style="font-size: 1.2rem; margin-top: 1rem; line-height: 1.8;">{translated}</p>'
+                    f'</div>',
+                    unsafe_allow_html=True
                 )
-            
-            st.markdown("---")
-            st.markdown(
-                f'<div class="translation-box">'
-                f'<h3>{to_lang[0]} Translation:</h3>'
-                f'<p style="font-size: 1.2rem; margin-top: 1rem;">{translated}</p>'
-                f'</div>',
-                unsafe_allow_html=True
-            )
-            
-            st.download_button(
-                label="📥 Download Translation",
-                data=translated,
-                file_name=f"translation_{from_lang[1]}_to_{to_lang[1]}.txt",
-                mime="text/plain"
-            )
+                
+                col_dl1, col_dl2 = st.columns(2)
+                with col_dl1:
+                    st.download_button(
+                        label="📥 Download Translation",
+                        data=translated,
+                        file_name=f"translation_{from_lang[1]}_to_{to_lang[1]}.txt",
+                        mime="text/plain",
+                        use_container_width=True
+                    )
+                with col_dl2:
+                    # Copy to clipboard hint
+                    st.info("💡 Click text above to select and copy")
         else:
             st.warning("⚠️ Please enter text to translate")
     
     # Quick examples
     st.markdown("---")
-    st.markdown("**💡 Quick Examples:**")
+    st.markdown("**⚡ Quick Translation Examples:**")
     
     quick_examples = {
         "💊 Medication": "Patient prescribed Metformin 500mg twice daily and Lisinopril 10mg once daily.",
@@ -470,105 +509,153 @@ with tab2:
     for i, (title, text) in enumerate(quick_examples.items()):
         with cols[i]:
             if st.button(title, use_container_width=True, key=f"quick_translate_{i}"):
-                st.session_state.translate_input = text
+                st.session_state.quick_translate_text = text
                 st.rerun()
 
+
 # ============================================================================
-# TAB 3: VOICE TRANSCRIPTION (NEW!)
+# TAB 3: VOICE TRANSCRIPTION (ENHANCED WITH RECORDING!)
 # ============================================================================
 with tab3:
     st.subheader("🎤 Voice-to-Text Transcription")
-    st.markdown("Convert doctor voice notes and medical audio to text using Azure Speech")
     
-    st.markdown(
-        '<div class="feature-card">'
-        '<h4>📋 How It Works:</h4>'
-        '<ol>'
-        '<li>Upload audio file (WAV, MP3) or use microphone</li>'
-        '<li>Azure Speech transcribes medical terminology accurately</li>'
-        '<li>Get editable text output for EHR integration</li>'
-        '</ol>'
-        '</div>',
-        unsafe_allow_html=True
+    # Enhanced description
+    st.markdown("""
+    <div style='background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 1.5rem; border-radius: 10px; margin-bottom: 1.5rem;'>
+        <h4 style='color: white; margin: 0;'>🎯 Transcription Features:</h4>
+        <ul style='color: #E0E0E0; margin-top: 0.5rem;'>
+            <li><strong>Audio File Upload:</strong> WAV, MP3, M4A formats supported</li>
+            <li><strong>Live Recording:</strong> Record directly from your microphone</li>
+            <li><strong>Medical Accuracy:</strong> Optimized for medical terminology</li>
+            <li><strong>Instant Analysis:</strong> Automatically detect PII in transcriptions</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Two modes: Upload or Record
+    mode = st.radio(
+        "Choose transcription mode:",
+        options=["📤 Upload Audio File", "🎙️ Record Live"],
+        horizontal=True
     )
     
-    st.markdown("---")
-    
-    # Audio upload
-    st.markdown("**🎵 Upload Audio File:**")
-    audio_file = st.file_uploader(
-        "Choose audio file (WAV format recommended)",
-        type=["wav", "mp3", "m4a"],
-        help="Upload doctor voice notes, patient consultations, or medical audio"
-    )
-    
-    if audio_file:
-        st.audio(audio_file, format="audio/wav")
+    if mode == "📤 Upload Audio File":
+        st.markdown("---")
+        st.markdown("**🎵 Upload Audio File:**")
+        audio_file = st.file_uploader(
+            "Choose audio file (WAV, MP3, M4A)",
+            type=["wav", "mp3", "m4a"],
+            help="Upload doctor voice notes, patient consultations, or medical audio"
+        )
         
-        if st.button("🎤 Transcribe Audio", type="primary", use_container_width=True):
-            # Save uploaded file temporarily
-            with open("temp_audio.wav", "wb") as f:
-                f.write(audio_file.read())
+        if audio_file:
+            st.audio(audio_file, format="audio/wav")
             
-            with st.spinner("🔄 Transcribing with Azure Speech..."):
-                result = st.session_state.speech.audio_to_text("temp_audio.wav")
-            
-            # Clean up temp file
-            if os.path.exists("temp_audio.wav"):
-                os.remove("temp_audio.wav")
+            if st.button("🎤 Transcribe Audio", type="primary", use_container_width=True):
+                # Save temporarily
+                with open("temp_audio.wav", "wb") as f:
+                    f.write(audio_file.read())
+                
+                with st.spinner("🔄 Transcribing with Azure Speech..."):
+                    result = st.session_state.speech.audio_to_text("temp_audio.wav")
+                
+                # Clean up
+                if os.path.exists("temp_audio.wav"):
+                    os.remove("temp_audio.wav")
+                
+                if result["success"]:
+                    st.markdown("---")
+                    st.success("✅ Transcription Complete!")
+                    
+                    st.text_area(
+                        "Transcribed Text:",
+                        value=result["text"],
+                        height=200,
+                        key="transcribed_text"
+                    )
+                    
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        st.download_button(
+                            label="📥 Download Transcription",
+                            data=result["text"],
+                            file_name="transcription.txt",
+                            mime="text/plain",
+                            use_container_width=True
+                        )
+                    
+                    with col2:
+                        if st.button("🔍 Analyze for PII", use_container_width=True):
+                            with st.spinner("Analyzing..."):
+                                analysis = st.session_state.redactor.process_document(result["text"])
+                            st.success(f"✅ Found {analysis['total_entities']} entities ({len(analysis['pii_entities'])} PII)")
+                
+                else:
+                    st.error(f"❌ Transcription failed: {result['error']}")
+        
+        else:
+            st.info("👆 Upload an audio file to start transcription")
+    
+    else:  # Live Recording Mode
+        st.markdown("---")
+        st.markdown("**🎙️ Live Recording:**")
+        
+        st.info("""
+        **How to use:**
+        1. Click **Start Recording** button below
+        2. Speak clearly into your microphone
+        3. Azure Speech will transcribe in real-time
+        4. Click **Stop** when finished
+        """)
+        
+        if st.button("🔴 Start Recording", type="primary", use_container_width=True):
+            with st.spinner("🎤 Listening... Speak now!"):
+                result = st.session_state.speech.microphone_to_text()
             
             if result["success"]:
                 st.markdown("---")
-                st.markdown(
-                    '<div class="success-box">'
-                    '<h3>✅ Transcription Complete</h3>'
-                    '</div>',
-                    unsafe_allow_html=True
-                )
+                st.success("✅ Recording Complete!")
                 
                 st.text_area(
                     "Transcribed Text:",
                     value=result["text"],
-                    height=200,
-                    key="transcribed_text"
+                    height=150,
+                    key="live_transcribed_text"
                 )
                 
                 col1, col2 = st.columns(2)
                 with col1:
                     st.download_button(
-                        label="📥 Download as Text",
+                        label="📥 Download Transcription",
                         data=result["text"],
-                        file_name="transcription.txt",
-                        mime="text/plain"
+                        file_name="live_transcription.txt",
+                        mime="text/plain",
+                        use_container_width=True
                     )
                 
                 with col2:
-                    # Analyze transcribed text
-                    if st.button("🔍 Analyze Transcription", use_container_width=True):
+                    if st.button("🔍 Analyze for PII", use_container_width=True, key="analyze_live"):
                         with st.spinner("Analyzing..."):
                             analysis = st.session_state.redactor.process_document(result["text"])
                         st.success(f"✅ Found {analysis['total_entities']} entities")
-                        st.json(analysis)
             
             else:
-                st.error(f"❌ Transcription failed: {result['error']}")
-    
-    else:
-        st.info("👆 Upload an audio file to start transcription")
+                st.error(f"❌ Recording failed: {result['error']}")
     
     st.markdown("---")
     st.markdown("**💡 Use Cases:**")
     st.markdown("""
-- **🏥 Clinical Documentation:** Transcribe doctor-patient consultations
-- **📝 Voice Notes:** Convert voice memos to structured text
-- **🔊 Dictation:** Hands-free medical record entry
-- **📞 Telemedicine:** Transcribe virtual appointments
+    - **🏥 Clinical Documentation:** Transcribe doctor-patient consultations
+    - **📝 Voice Notes:** Convert voice memos to structured text
+    - **🔊 Dictation:** Hands-free medical record entry
+    - **📞 Telemedicine:** Transcribe virtual appointments
+    - **🎓 Medical Training:** Document clinical observations
     """)
 
 # ============================================================================
-# TAB 4: BATCH PROCESSING (Enhanced)
+# TAB 4: BATCH PROCESSING (FIXED - was in tab2 by mistake!)
 # ============================================================================
-with tab2:
+with tab4:  # Changed from tab2 to tab4
     st.subheader("📊 Batch File Processing")
     st.markdown("Process multiple medical documents at once (TXT, PDF, DOCX)")
     
@@ -660,7 +747,7 @@ with tab2:
                     )
 
 # ============================================================================
-# TAB 5: EXAMPLES (Enhanced)
+# TAB 5: EXAMPLES (FIXED!)
 # ============================================================================
 with tab5:
     st.subheader("📖 Example Medical Texts")
@@ -691,9 +778,16 @@ Contact: john.smith@email.com, Phone: +1-555-0123."""
     for i, (title, text) in enumerate(examples.items()):
         with cols[i]:
             if st.button(f"📋 {title}", use_container_width=True, key=f"example_{i}"):
-                st.session_state.analyze_input = text
-                st.success(f"✅ Loaded: {title}")
-                st.code(text, language="text")
+                # Use a different session state key
+                st.session_state.example_loaded_text = text
+                st.session_state.example_loaded_title = title
+                st.rerun()
+    
+    # Show loaded example
+    if 'example_loaded_text' in st.session_state:
+        st.success(f"✅ Loaded: {st.session_state.example_loaded_title}")
+        st.code(st.session_state.example_loaded_text, language="text")
+        st.info("👆 Copy this text and paste into the **Analyze Text** tab")
 
 st.markdown("---")
 st.markdown(
