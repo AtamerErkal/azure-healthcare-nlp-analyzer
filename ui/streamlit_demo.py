@@ -157,7 +157,14 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-header">🏥 Healthcare NLP Analyzer</div>', unsafe_allow_html=True)
+# HEADER - FIXED ICON!
+st.markdown("""
+<div style='text-align: center; margin-bottom: 1rem;'>
+    <img src='https://img.icons8.com/fluency/96/medical-history.png' width='80' style='vertical-align: middle; margin-right: 1rem;'>
+    <span style='font-size: 3.5rem; font-weight: 800; background: linear-gradient(90deg, #4CAF50, #2196F3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; vertical-align: middle;'>Healthcare NLP Analyzer</span>
+</div>
+""", unsafe_allow_html=True)
+
 st.markdown('<div class="sub-header">Advanced Medical Text Processing Platform</div>', unsafe_allow_html=True)
 
 # Add feature badges
@@ -201,7 +208,7 @@ with st.sidebar:
 
 ✅ **Extract** clinical information  
 ✅ **Protect** patient privacy (HIPAA-ready)  
-✅ **Translate** to 100+ languages  
+✅ **Translate** to 7 languages  
 ✅ **Transcribe** doctor voice notes  
 ✅ **Preserve** medical data integrity
     """)
@@ -220,10 +227,10 @@ with st.sidebar:
     
     with st.expander("🌐 Medical Translation"):
         st.markdown("""
-- 100+ languages supported
+- **7 languages** supported (EN, DE, TR, FR, ES, AR, IT)
 - Context-aware translation
 - Medical terminology preserved
-- EN ↔ TR, DE, FR, ES, etc.
+- Bidirectional translation
         """)
     
     with st.expander("🎤 Voice Transcription"):
@@ -275,18 +282,19 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 ])
 
 # ============================================================================
-# TAB 1: ANALYZE TEXT (Existing - Enhanced)
+# TAB 1: ANALYZE TEXT (ENHANCED WITH COLOR HIGHLIGHTING!)
 # ============================================================================
 with tab1:
     st.subheader("🔍 Medical Text Analysis & PII Redaction")
 
-    col_input, col_output = st.columns(2)
+    # Three columns: Original, Redacted with highlights, Entities legend
+    col_input, col_output, col_entities = st.columns([2, 2, 1.5])
 
     with col_input:
         st.markdown("**📄 Original Medical Text:**")
         text_input = st.text_area(
             "Paste clinical notes, patient records, or medical documentation:",
-            height=350,
+            height=400,
             placeholder="""Example:
 Patient: Sarah Johnson, DOB: 03/15/1985
 Chief Complaint: Type 2 Diabetes
@@ -303,17 +311,111 @@ Contact: sjohnson@email.com, +1-555-1234""",
             with st.spinner("🔄 Processing with Azure AI Healthcare Analytics..."):
                 result = st.session_state.redactor.process_document(text_input)
 
+            # Helper function to highlight entities in text
+            def highlight_entities(text, entities, color_map):
+                """Add HTML spans with background colors for entities"""
+                highlighted = text
+                # Sort entities by offset (reverse) to maintain positions
+                sorted_entities = sorted(entities, key=lambda e: e.get('offset', 0), reverse=True)
+                
+                for entity in sorted_entities:
+                    entity_text = entity['text']
+                    category = entity['category']
+                    color = color_map.get(category, '#888888')
+                    
+                    # Find and replace with highlighted version
+                    replacement = f'<span style="background-color: {color}; padding: 2px 4px; border-radius: 3px; font-weight: bold;">{entity_text}</span>'
+                    highlighted = highlighted.replace(entity_text, replacement, 1)
+                
+                return highlighted
+
+            # Color mapping
+            healthcare_colors = {
+                'MedicationName': '#4CAF50',
+                'Dosage': '#66BB6A',
+                'Diagnosis': '#81C784',
+                'SymptomOrSign': '#A5D6A7',
+                'TreatmentName': '#4DB6AC',
+                'ExaminationName': '#4DD0E1',
+                'BodyStructure': '#4FC3F7',
+                'MedicationClass': '#64B5F6',
+                'Frequency': '#7986CB',
+                'RouteOrMode': '#9575CD'
+            }
+            
+            medical_colors = {
+                'Person': '#1976D2',
+                'DateTime': '#1E88E5',
+                'PersonType': '#2196F3'
+            }
+            
+            pii_colors = {
+                'Email': '#D32F2F',
+                'PhoneNumber': '#C62828',
+                'USSocialSecurityNumber': '#B71C1C',
+                'IPAddress': '#E53935'
+            }
+
             with col_output:
                 st.markdown("**🔒 Redacted Text (PHI Removed):**")
-                st.text_area(
-                    "",
-                    value=result["redacted_text"],
-                    height=350,
-                    label_visibility="collapsed",
-                    key="redacted_output"
+                
+                # Create highlighted redacted text
+                redacted_highlighted = result["redacted_text"]
+                
+                # Highlight PII placeholders in redacted text
+                pii_placeholders = {
+                    '[PERSON]': '#1976D2',
+                    '[EMAIL]': '#D32F2F',
+                    '[PHONE]': '#D32F2F',
+                    '[SSN]': '#D32F2F',
+                    '[DATE]': '#1976D2'
+                }
+                
+                for placeholder, color in pii_placeholders.items():
+                    redacted_highlighted = redacted_highlighted.replace(
+                        placeholder,
+                        f'<span style="background-color: {color}; color: white; padding: 2px 6px; border-radius: 4px; font-weight: bold;">{placeholder}</span>'
+                    )
+                
+                st.markdown(
+                    f'<div style="background-color: #1a1a1a; padding: 1rem; border-radius: 8px; height: 400px; overflow-y: auto; line-height: 1.8;">{redacted_highlighted}</div>',
+                    unsafe_allow_html=True
                 )
 
-            # Metrics
+            with col_entities:
+                st.markdown("**🏷️ Entity Legend:**")
+                
+                # Healthcare entities legend
+                st.markdown("**Healthcare Terms:**")
+                for entity in result["healthcare_entities"][:5]:  # Show first 5
+                    color = healthcare_colors.get(entity['category'], '#4CAF50')
+                    st.markdown(
+                        f'<div style="background-color: {color}; padding: 0.3rem 0.6rem; border-radius: 4px; margin: 0.2rem 0; font-size: 0.85rem;">'
+                        f'{entity["category"]}'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+                
+                st.markdown("**Medical Entities:**")
+                for entity in result["medical_entities"][:3]:
+                    color = medical_colors.get(entity['category'], '#1976D2')
+                    st.markdown(
+                        f'<div style="background-color: {color}; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; margin: 0.2rem 0; font-size: 0.85rem;">'
+                        f'{entity["category"]}'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+                
+                st.markdown("**PII (Redacted):**")
+                for entity in result["pii_entities"][:3]:
+                    st.markdown(
+                        f'<div style="background-color: #D32F2F; color: white; padding: 0.3rem 0.6rem; border-radius: 4px; margin: 0.2rem 0; font-size: 0.85rem;">'
+                        f'{entity["category"]}'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+
+            # Metrics row
             st.markdown("---")
             metric_col1, metric_col2, metric_col3, metric_col4 = st.columns(4)
             with metric_col1:
@@ -335,10 +437,11 @@ Contact: sjohnson@email.com, +1-555-1234""",
                 st.markdown("**🏥 Healthcare Terms (Preserved):**")
                 if result["healthcare_entities"]:
                     for e in result["healthcare_entities"]:
+                        color = healthcare_colors.get(e['category'], '#4CAF50')
                         st.markdown(
-                            f'<div class="entity-box healthcare-entity">'
+                            f'<div class="entity-box" style="background: linear-gradient(135deg, {color}22 0%, {color}44 100%); border-left: 4px solid {color};">'
                             f'<strong>{e["text"]}</strong><br>'
-                            f'<span style="color: #81C784;">📋 {e["category"]}</span> • '
+                            f'<span style="color: {color};">📋 {e["category"]}</span> • '
                             f'<span style="color: #BDBDBD;">Confidence: {e["confidence_score"]:.0%}</span>'
                             f'</div>',
                             unsafe_allow_html=True
@@ -350,10 +453,11 @@ Contact: sjohnson@email.com, +1-555-1234""",
                 st.markdown("**👤 Medical Entities (Redacted):**")
                 if result["medical_entities"]:
                     for e in result["medical_entities"]:
+                        color = medical_colors.get(e['category'], '#1976D2')
                         st.markdown(
-                            f'<div class="entity-box medical-entity">'
+                            f'<div class="entity-box" style="background: linear-gradient(135deg, {color}22 0%, {color}44 100%); border-left: 4px solid {color};">'
                             f'<strong>{e["text"]}</strong><br>'
-                            f'<span style="color: #64B5F6;">📌 {e["category"]}</span> • '
+                            f'<span style="color: {color};">📌 {e["category"]}</span> • '
                             f'<span style="color: #BDBDBD;">Confidence: {e["confidence_score"]:.0%}</span>'
                             f'</div>',
                             unsafe_allow_html=True
@@ -366,7 +470,7 @@ Contact: sjohnson@email.com, +1-555-1234""",
                 if result["pii_entities"]:
                     for e in result["pii_entities"]:
                         st.markdown(
-                            f'<div class="entity-box pii-entity">'
+                            f'<div class="entity-box" style="background: linear-gradient(135deg, #D32F2F22 0%, #D32F2F44 100%); border-left: 4px solid #D32F2F;">'
                             f'<strong>{e["text"]}</strong><br>'
                             f'<span style="color: #EF5350;">🚫 {e["category"]}</span> • '
                             f'<span style="color: #BDBDBD;">Confidence: {e["confidence_score"]:.0%}</span>'
@@ -495,19 +599,32 @@ with tab2:
         else:
             st.warning("⚠️ Please enter text to translate")
     
-    # Quick examples
+    # Quick examples - EXPANDED!
     st.markdown("---")
     st.markdown("**⚡ Quick Translation Examples:**")
-    
+
     quick_examples = {
-        "💊 Medication": "Patient prescribed Metformin 500mg twice daily and Lisinopril 10mg once daily.",
-        "🩺 Diagnosis": "Patient diagnosed with Type 2 Diabetes Mellitus and essential hypertension.",
-        "📊 Vitals": "Blood pressure: 140/90 mmHg. Heart rate: 82 bpm. Temperature: 36.9°C."
+        "💊 Prescription": "Patient prescribed Metformin 500mg twice daily for Type 2 Diabetes management, Lisinopril 10mg once daily for hypertension, and Atorvastatin 20mg at bedtime for hyperlipidemia. Monitor blood glucose levels and blood pressure weekly.",
+        
+        "🩺 Diagnosis": "Patient diagnosed with Type 2 Diabetes Mellitus with HbA1c of 8.2%, essential hypertension stage 2 with average BP 152/94 mmHg, and hyperlipidemia with LDL cholesterol 165 mg/dL. Family history positive for cardiovascular disease.",
+        
+        "📊 Vitals & Labs": "Vital signs: Blood pressure 140/90 mmHg, heart rate 82 bpm, respiratory rate 16/min, temperature 36.9°C, oxygen saturation 97% on room air. Laboratory results: Fasting glucose 156 mg/dL, HbA1c 7.8%, total cholesterol 245 mg/dL, triglycerides 198 mg/dL.",
+        
+        "🏥 Clinical Note": "64-year-old male with chief complaint of chest pain radiating to left arm, onset 2 hours ago. Patient reports associated shortness of breath and diaphoresis. Past medical history significant for hypertension and hyperlipidemia. Currently on aspirin 81mg daily and metoprolol 50mg BID.",
+        
+        "📋 Discharge Summary": "Patient admitted for acute exacerbation of congestive heart failure. Treated with IV furosemide 40mg BID and potassium supplementation. Condition improved with diuresis, dyspnea resolved. Discharged on oral furosemide 20mg daily, potassium chloride 20mEq daily, and metoprolol 25mg BID. Follow-up in cardiology clinic in 2 weeks.",
+        
+        "🔬 Lab Results": "Complete blood count shows white blood cells 8.5 K/uL, hemoglobin 13.2 g/dL, hematocrit 39%, platelets 245 K/uL. Comprehensive metabolic panel: sodium 138 mEq/L, potassium 4.2 mEq/L, chloride 102 mEq/L, bicarbonate 24 mEq/L, BUN 18 mg/dL, creatinine 1.1 mg/dL, glucose 142 mg/dL."
     }
-    
-    cols = st.columns(3)
+
+    # Create 2 rows of 3 columns
+    cols_row1 = st.columns(3)
+    cols_row2 = st.columns(3)
+
+    all_cols = cols_row1 + cols_row2
+
     for i, (title, text) in enumerate(quick_examples.items()):
-        with cols[i]:
+        with all_cols[i]:
             if st.button(title, use_container_width=True, key=f"quick_translate_{i}"):
                 st.session_state.quick_translate_text = text
                 st.rerun()
@@ -747,45 +864,97 @@ with tab4:  # Changed from tab2 to tab4
                     )
 
 # ============================================================================
-# TAB 5: EXAMPLES (FIXED!)
+# TAB 5: EXAMPLES (EXPANDED!)
 # ============================================================================
 with tab5:
     st.subheader("📖 Example Medical Texts")
     st.markdown("Click to load examples and test the analyzer:")
 
     examples = {
-        "Annual Checkup": """Annual checkup: Linda Martinez, Age 45, BMI 28.5.
-Labs: HbA1c 6.2% (prediabetic range), LDL 145 mg/dL.
-Recommendations: Lifestyle modification, recheck in 6 months.
-Email: lmartinez@email.com, Phone: +1-555-4567.""",
+        "Annual Checkup": """Annual wellness visit for Linda Martinez, DOB: 05/22/1978, Age 45, BMI 28.5.
+Chief complaint: Routine checkup, no specific concerns.
+Vital signs: BP 128/82 mmHg, HR 76 bpm, Temperature 36.8°C, SpO2 98% on room air.
+Laboratory results: HbA1c 6.2% (prediabetic range), fasting glucose 112 mg/dL, LDL cholesterol 145 mg/dL, HDL 52 mg/dL, triglycerides 178 mg/dL.
+Assessment: Prediabetes, dyslipidemia, overweight (BMI 28.5).
+Plan: Lifestyle modification with emphasis on diet and exercise, recheck labs in 6 months. Consider metformin if HbA1c continues to rise.
+Contact: lmartinez@email.com, Phone: +1-555-4567.""",
 
-        "Emergency Visit": """Emergency visit: David Chen, DOB 11/05/1990.
-Presenting: Laceration to right forearm, 4cm length.
-Procedure: Wound irrigation, closure with 8 sutures.
-Vitals: BP 118/76, HR 82, Temp 36.9°C.
-Discharge: Cephalexin 500mg TID x 7 days.
-Follow-up in 5 days.""",
+        "Emergency Visit": """Emergency department visit: David Chen, DOB: 11/05/1990, MRN: 2847563.
+Chief complaint: Laceration to right forearm sustained during carpentry work.
+History of present illness: Patient reports acute injury 2 hours ago when saw slipped. Wound actively bleeding on arrival.
+Examination: 4cm linear laceration to volar aspect of right forearm, no tendon involvement, neurovascular exam intact.
+Procedure: Wound irrigation with 500mL normal saline, hemostasis achieved, closure with 8 interrupted 4-0 nylon sutures.
+Vital signs: BP 118/76 mmHg, HR 82 bpm, Temperature 36.9°C.
+Medications prescribed: Cephalexin 500mg PO TID x 7 days for infection prophylaxis, ibuprofen 400mg PO q6h PRN for pain.
+Wound care instructions: Keep clean and dry, remove sutures in 10-12 days. Follow-up in 5 days for wound check.
+Tetanus toxoid administered (last tetanus 2015).
+Emergency contact: Phone +1-555-8901, Email: dchen@email.com""",
 
-        "Hospital Admission": """Patient: John Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789.
-Admitted on January 20, 2024 at Memorial Hospital.
-Chief Complaint: Type 2 Diabetes and Hypertension.
-Vitals: BP 152/94, HR 88, BMI 31.2, SpO2 96%
-Medications: Metformin 500mg BID, Lisinopril 10mg QD.
-Contact: john.smith@email.com, Phone: +1-555-0123."""
+        "Hospital Admission": """Patient: John Robert Smith, Date of Birth: March 15, 1985, SSN: 123-45-6789, MRN: 9876543.
+Admitted: January 20, 2024 at 14:30 to Memorial Hospital, 5th Floor Medical Unit, Room 512.
+Attending physician: Dr. Sarah Williams, Internal Medicine.
+Chief complaint: Uncontrolled Type 2 Diabetes Mellitus and hypertension.
+History of present illness: 39-year-old male with 5-year history of Type 2 DM, poorly controlled despite oral medications. Recent home glucose readings 250-300 mg/dL. Also reports headaches and blurred vision.
+Past medical history: Type 2 Diabetes Mellitus (2019), Essential Hypertension (2020), Hyperlipidemia (2021).
+Vital signs on admission: BP 152/94 mmHg, HR 88 bpm, Temperature 37.1°C, BMI 31.2, SpO2 96% on room air.
+Laboratory results: HbA1c 9.8%, fasting glucose 284 mg/dL, creatinine 1.4 mg/dL, eGFR 58 mL/min, urine microalbumin 180 mg/g creatinine.
+Current medications: Metformin 1000mg BID, Lisinopril 10mg QD, Atorvastatin 20mg QHS.
+Assessment: Uncontrolled Type 2 Diabetes with early diabetic nephropathy, stage 2 hypertension, dyslipidemia.
+Plan: Initiate insulin therapy with glargine 20 units QHS and aspart sliding scale, increase lisinopril to 20mg QD, diabetes education, nephrology consult.
+Contact information: Email john.smith@email.com, Mobile +1-555-0123, Emergency contact (wife): Mary Smith +1-555-0124.""",
+
+        "Surgical Consultation": """Surgical consultation note for Patricia Anderson, DOB: 08/14/1962, Age 61, MRN: 5432109.
+Referring physician: Dr. Michael Brown, Gastroenterology.
+Chief complaint: Symptomatic cholelithiasis, recurrent biliary colic.
+History of present illness: Patient reports multiple episodes of right upper quadrant pain over past 6 months, typically postprandial, lasting 2-4 hours. Most recent episode 3 days ago, severity 8/10, associated with nausea and vomiting.
+Imaging: Abdominal ultrasound shows multiple gallstones, largest 1.2cm, gallbladder wall thickening 4mm, no ductal dilatation. HIDA scan demonstrates decreased gallbladder ejection fraction of 15% (normal >35%).
+Past surgical history: Appendectomy 1985, cesarean section 1988, hysterectomy 2010.
+Current medications: Amlodipine 5mg daily for hypertension, levothyroxine 75mcg daily for hypothyroidism.
+Assessment: Symptomatic cholelithiasis with chronic cholecystitis, decreased gallbladder function.
+Recommendation: Laparoscopic cholecystectomy. Discussed risks including bleeding, infection, bile duct injury (<1%), conversion to open (<5%). Patient agrees to proceed.
+Preoperative clearance: Cardiology evaluation recommended given age and hypertension. Schedule EKG and basic metabolic panel.
+Contact: panderson@email.com, Phone: +1-555-2468.""",
+
+        "Psychiatric Evaluation": """Initial psychiatric evaluation: Michael Torres, DOB: 02/28/1995, Age 28, Patient ID: PSY-78921.
+Chief complaint: "I've been feeling anxious and can't sleep."
+History of present illness: Patient reports 6-month history of increasing anxiety, panic attacks 2-3 times per week, difficulty initiating and maintaining sleep. Denies suicidal ideation, homicidal ideation, or psychotic symptoms. No recent major life stressors identified.
+Psychiatric history: No previous psychiatric hospitalizations or suicide attempts. Brief trial of sertraline 2 years ago, discontinued due to side effects.
+Social history: Single, works as software engineer, denies alcohol or substance use, exercises regularly, good social support network.
+Mental status exam: Alert and oriented x3, well-groomed, cooperative, normal speech, anxious mood, congruent affect, thought process goal-directed, no delusions or hallucinations, insight and judgment intact.
+Assessment: Generalized anxiety disorder, moderate severity, with associated insomnia.
+Plan: Initiate escitalopram 10mg daily, hydroxyzine 25mg PRN for acute anxiety, sleep hygiene education, refer to cognitive behavioral therapy. Follow-up in 2 weeks to assess response and side effects.
+Contact: mtorres@email.com, Phone: +1-555-7890.""",
+
+        "Pediatric Well-Child": """Well-child check: Emma Johnson, DOB: 06/15/2018, Age 5 years 8 months, Chart #: PED-45632.
+Parent: Jennifer Johnson, Phone: +1-555-3698, Email: jjohnson@email.com
+Chief complaint: Routine 6-year well-child visit, kindergarten physical.
+Growth parameters: Height 112cm (50th percentile), Weight 19.2kg (45th percentile), BMI 15.3 (normal range). Head circumference 50.5cm.
+Vital signs: BP 95/58 mmHg, HR 88 bpm, Respiratory rate 20/min, Temperature 36.7°C.
+Developmental milestones: Age-appropriate. Speaks in complete sentences, recognizes colors and shapes, counts to 20, writes first name, follows multi-step instructions.
+Physical examination: General appearance healthy, well-nourished. HEENT: normocephalic, atraumatic, TMs clear bilaterally, dentition good. Cardiovascular: regular rate and rhythm, no murmurs. Respiratory: clear to auscultation bilaterally. Abdomen: soft, non-tender. Musculoskeletal: normal gait, full range of motion. Neurological: age-appropriate reflexes and coordination.
+Immunizations: Up to date per CDC schedule. Administered today: DTaP (5th dose), IPV (4th dose), MMR (2nd dose), Varicella (2nd dose).
+Anticipatory guidance: Discussed nutrition, physical activity, screen time limits, stranger danger, bicycle helmet safety, booster seat usage.
+Assessment: Healthy 5-year-old female, growth and development appropriate for age.
+Plan: Continue routine diet and activities. Next well-child visit at age 7. Dental referral for 6-month cleaning. Vision and hearing screening normal, no referrals needed at this time."""
     }
 
-    cols = st.columns(3)
+    # Create 2 rows of 3 columns
+    cols_row1 = st.columns(3)
+    cols_row2 = st.columns(3)
+    
+    all_cols = cols_row1 + cols_row2
+    
     for i, (title, text) in enumerate(examples.items()):
-        with cols[i]:
+        with all_cols[i]:
             if st.button(f"📋 {title}", use_container_width=True, key=f"example_{i}"):
-                # Use a different session state key
                 st.session_state.example_loaded_text = text
                 st.session_state.example_loaded_title = title
                 st.rerun()
     
     # Show loaded example
     if 'example_loaded_text' in st.session_state:
-        st.success(f"✅ Loaded: {st.session_state.example_loaded_title}")
+        st.markdown("---")
+        st.success(f"✅ Loaded: **{st.session_state.example_loaded_title}**")
         st.code(st.session_state.example_loaded_text, language="text")
         st.info("👆 Copy this text and paste into the **Analyze Text** tab")
 
