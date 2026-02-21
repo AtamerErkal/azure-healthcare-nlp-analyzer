@@ -14,7 +14,7 @@
 **Healthcare NLP Analyzer** is a comprehensive medical text processing platform that combines **PII detection**, **medical translation**, and **voice transcription** into a single, powerful application.
 
 <p align="center">
-  <img src="docs/01_main_dashboard.png" alt="Main Dashboard" width="800">
+  <img src="docs/screenshots/01_main_dashboard.png" alt="Main Dashboard" width="800">
   <br>
   <em>Professional dark theme interface with comprehensive medical text processing features</em>
 </p>
@@ -36,7 +36,7 @@
 **Automatically identify and redact protected health information (PHI):**
 
 <p align="center">
-  <img src="docs/02_analyze_text.png" alt="Text Analysis with Entity Detection" width="800">
+  <img src="docs/screenshots/02_analyze_text.png" alt="Text Analysis with Entity Detection" width="800">
   <br>
   <em>Real-time PII detection with color-coded entity highlighting</em>
 </p>
@@ -71,7 +71,7 @@
 **Translate clinical content to 7 languages with medical context awareness:**
 
 <p align="center">
-  <img src="docs/03_translation.png" alt="Medical Translation Interface" width="800">
+  <img src="docs/screenshots/03_translation.png" alt="Medical Translation Interface" width="800">
   <br>
   <em>EN→TR medical translation with context preservation</em>
 </p>
@@ -107,7 +107,7 @@
 #### 📤 Audio File Upload Mode
 
 <p align="center">
-  <img src="docs/04_voice_upload.png" alt="Audio File Upload" width="800">
+  <img src="docs/screenshots/04_voice_upload.png" alt="Audio File Upload" width="800">
   <br>
   <em>Upload and transcribe medical audio files (WAV, MP3, M4A)</em>
 </p>
@@ -122,7 +122,7 @@
 #### 🎙️ Live Recording Mode
 
 <p align="center">
-  <img src="docs/05_voice_record.png" alt="Live Recording" width="800">
+  <img src="docs/screenshots/05_voice_record.png" alt="Live Recording" width="800">
   <br>
   <em>Real-time microphone transcription for hands-free documentation</em>
 </p>
@@ -146,7 +146,7 @@
 ### 4. 📊 Batch Processing
 
 <p align="center">
-  <img src="docs/06_batch_processing.png" alt="Batch Processing" width="800">
+  <img src="docs/screenshots/06_batch_processing.png" alt="Batch Processing" width="800">
   <br>
   <em>Process multiple documents simultaneously with summary statistics</em>
 </p>
@@ -163,7 +163,7 @@
 ### 5. 📖 Example Library
 
 <p align="center">
-  <img src="docs/07_examples.png" alt="Example Medical Texts" width="800">
+  <img src="docs/screenshots/07_examples.png" alt="Example Medical Texts" width="800">
   <br>
   <em>6 comprehensive medical scenarios ready to test</em>
 </p>
