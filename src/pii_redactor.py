@@ -2,6 +2,8 @@ import os
 from dotenv import load_dotenv
 from azure.ai.textanalytics import TextAnalyticsClient
 from azure.core.credentials import AzureKeyCredential
+from src.keyvault_config import KeyVaultConfig
+
 import json
 from datetime import datetime
 import glob
