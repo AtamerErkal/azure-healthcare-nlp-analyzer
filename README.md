@@ -13,6 +13,12 @@
 
 **Healthcare NLP Analyzer** is a comprehensive medical text processing platform that combines **PII detection**, **medical translation**, and **voice transcription** into a single, powerful application.
 
+<p align="center">
+  <img src="docs/01_main_dashboard.png" alt="Main Dashboard" width="800">
+  <br>
+  <em>Professional dark theme interface with comprehensive medical text processing features</em>
+</p>
+
 ### Why This Platform?
 
 ✨ **HIPAA-Ready PII Redaction** — Automatically detect and remove patient identifiers  
@@ -29,6 +35,14 @@
 
 **Automatically identify and redact protected health information (PHI):**
 
+<p align="center">
+  <img src="docs/02_analyze_text.png" alt="Text Analysis with Entity Detection" width="800">
+  <br>
+  <em>Real-time PII detection with color-coded entity highlighting</em>
+</p>
+
+**What Gets Detected:**
+
 | Category | What's Detected | Action |
 |----------|-----------------|--------|
 | 👤 **Patient Names** | Person entities | Replaced with `[PERSON]` |
@@ -44,14 +58,22 @@
 - 🦴 Body structures & anatomy
 - 💉 Treatments & procedures
 
+**Key Features:**
+- **3-Column Layout:** Original text, redacted text with color-coded placeholders, all detected entities
+- **Color Coding:** Healthcare entities (green), medical entities (blue), PII (red)
+- **Instant Analysis:** < 2 seconds per document
+- **Download Options:** Redacted text + JSON report
+
 ---
 
 ### 2. 🌐 Medical Text Translation
 
-**Translate clinical content to 7 languages:**
+**Translate clinical content to 7 languages with medical context awareness:**
 
 <p align="center">
-  <img src="docs/screenshots/03_translation.png" alt="Medical Translation" width="800">
+  <img src="docs/03_translation.png" alt="Medical Translation Interface" width="800">
+  <br>
+  <em>EN→TR medical translation with context preservation</em>
 </p>
 
 **Supported Languages:**
@@ -63,73 +85,102 @@
 - 🇸🇦 Arabic
 - 🇮🇹 Italian
 
-**Features:**
-- Context-aware medical terminology
-- Preserves clinical accuracy
-- Bidirectional translation
-- Instant results
+**Translation Features:**
+- **Context-Aware:** Preserves medical terminology accuracy
+- **Bidirectional:** Translate from/to any supported language
+- **Instant Results:** Real-time Azure Translator API
+- **Quick Examples:** Pre-loaded clinical scenarios (prescriptions, diagnoses, lab results)
+- **Download:** Save translations as text files
+
+**Use Cases:**
+- International patient care coordination
+- Medical research collaboration
+- Clinical trial documentation
+- Telemedicine consultations
 
 ---
 
 ### 3. 🎤 Voice-to-Text Transcription
 
-**Two transcription modes:**
+**Two transcription modes for flexible medical documentation:**
 
-#### 📤 Audio File Upload
+#### 📤 Audio File Upload Mode
+
+<p align="center">
+  <img src="docs/04_voice_upload.png" alt="Audio File Upload" width="800">
+  <br>
+  <em>Upload and transcribe medical audio files (WAV, MP3, M4A)</em>
+</p>
+
+**Features:**
 - Supported formats: WAV, MP3, M4A
 - Batch audio processing
 - Medical terminology optimized
+- Audio preview before transcription
+- Instant PII analysis on transcribed text
 
-#### 🎙️ Live Recording
-- Real-time microphone transcription
-- Hands-free documentation
-- Instant PII analysis
+#### 🎙️ Live Recording Mode
 
 <p align="center">
-  <img src="docs/screenshots/04_voice_upload.png" alt="Voice Transcription" width="800">
+  <img src="docs/05_voice_record.png" alt="Live Recording" width="800">
+  <br>
+  <em>Real-time microphone transcription for hands-free documentation</em>
 </p>
+
+**Features:**
+- Real-time microphone transcription
+- Hands-free documentation
+- One-click recording start
+- Automatic medical term recognition
+- Direct integration with PII detection
+
+**Use Cases:**
+- 🏥 Clinical documentation during patient exams
+- 📝 Voice memos for follow-up notes
+- 🔊 Dictation for medical reports
+- 📞 Telemedicine session transcription
+- 🎓 Medical training observations
 
 ---
 
 ### 4. 📊 Batch Processing
 
-Process multiple documents simultaneously:
-- TXT, PDF, DOCX formats
-- Automated redaction
-- Individual download links
-- Summary statistics
+<p align="center">
+  <img src="docs/06_batch_processing.png" alt="Batch Processing" width="800">
+  <br>
+  <em>Process multiple documents simultaneously with summary statistics</em>
+</p>
+
+**Process multiple documents at once:**
+- **Supported Formats:** TXT, PDF, DOCX
+- **Automated Redaction:** Batch PII removal
+- **Individual Downloads:** Separate redacted files
+- **Summary Statistics:** Total entities, healthcare terms, PII count
+- **Progress Tracking:** Real-time processing status
 
 ---
 
-## 🖼️ Screenshots
+### 5. 📖 Example Library
 
-### Main Dashboard
 <p align="center">
-  <img src="docs/screenshots/01_main_dashboard.png" alt="Main Dashboard" width="800">
+  <img src="docs/07_examples.png" alt="Example Medical Texts" width="800">
   <br>
-  <em>Professional dark theme with feature badges</em>
+  <em>6 comprehensive medical scenarios ready to test</em>
 </p>
 
-### Text Analysis
-<p align="center">
-  <img src="docs/screenshots/02_analyze_text.png" alt="Text Analysis" width="800">
-  <br>
-  <em>Real-time PII detection with entity breakdown</em>
-</p>
+**Pre-loaded Medical Scenarios:**
+- 📋 Annual Checkup
+- 🚑 Emergency Visit
+- 🏥 Hospital Admission
+- ⚕️ Surgical Consultation
+- 🧠 Psychiatric Evaluation
+- 👶 Pediatric Well-Child Visit
 
-### Medical Translation
-<p align="center">
-  <img src="docs/screenshots/03_translation.png" alt="Translation" width="800">
-  <br>
-  <em>7-language support with instant results</em>
-</p>
-
-### Voice Transcription
-<p align="center">
-  <img src="docs/screenshots/05_voice_record.png" alt="Live Recording" width="800">
-  <br>
-  <em>Live recording with real-time transcription</em>
-</p>
+**Each example includes:**
+- Complete medical documentation
+- Realistic patient information
+- Multiple entity types
+- Various PII elements
 
 ---
 
@@ -285,7 +336,7 @@ key = kv.get_credential("LANGUAGE-KEY")
 | Component | Technology |
 |-----------|-----------|
 | **NLP** | Azure AI Language (Healthcare Text Analytics) |
-| **Translation** | Azure Translator (100+ languages) |
+| **Translation** | Azure Translator (7 languages) |
 | **Speech** | Azure Speech (STT/TTS) |
 | **Security** | Azure Key Vault (RBAC) |
 | **Backend** | Python 3.10 |
@@ -318,6 +369,8 @@ key = kv.get_credential("LANGUAGE-KEY")
 - [x] Azure Key Vault integration
 - [x] Batch processing
 - [x] Professional Streamlit UI
+- [x] Color-coded entity highlighting
+- [x] Comprehensive example library
 
 ### Q2 2026
 
@@ -361,16 +414,16 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 
 **Atamer Erkal**
 
-💼 **Specialization:** Azure AI Solutions, Healthcare NLP, MLOps, Defence AI
-🎓 **Certification:** DAta Science, AI-102
+💼 **Specialization:** Azure AI Solutions, Healthcare NLP, MLOps, Defence AI  
+🎓 **Certifications:** Data Science, AI-102 (In Progress - March 2026)
 
 **Connect:**
 - 🐙 [GitHub](https://github.com/AtamerErkal)
 - 💼 [LinkedIn](https://linkedin.com/in/atamererkal)
 
 **Other Projects:**
-- [Content Safety Platform](https://github.com/AtamerErkal/content-safety-platform) — AI moderation with XAI
-- [Defence Document Intelligence](https://github.com/AtamerErkal/azure-defence-doc-intel) — Technical analysis
+- [Content Safety Platform](https://github.com/AtamerErkal/content-safety-platform) — AI moderation with Explainable AI
+- [Defence Document Intelligence](https://github.com/AtamerErkal/azure-defence-doc-intel) — Technical document analysis
 
 ---
 
@@ -385,7 +438,8 @@ This project is licensed under the **MIT License** - see [LICENSE](LICENSE) file
 ## 📞 Support
 
 - 🐛 **Issues:** [GitHub Issues](https://github.com/AtamerErkal/azure-healthcare-nlp-analyzer/issues)
-- 📚 **Docs:** [Azure AI Documentation](https://learn.microsoft.com/en-us/azure/ai-services/)
+- 💬 **Discussions:** [GitHub Discussions](https://github.com/AtamerErkal/azure-healthcare-nlp-analyzer/discussions)
+- 📚 **Documentation:** [Azure AI Docs](https://learn.microsoft.com/en-us/azure/ai-services/)
 
 ---
 
