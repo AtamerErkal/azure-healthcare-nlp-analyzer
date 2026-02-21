@@ -257,6 +257,79 @@ cp .env.example .env
 # AZURE_AI_KEY=your-key-here
 ```
 
+---
+
+## 🔐 Security & Advanced Features
+
+### 1. Azure Key Vault Integration
+
+**Production-Ready Credential Management:**
+```python
+from src.keyvault_config import KeyVaultConfig
+
+# Automatically uses Key Vault if available, falls back to .env
+kv = KeyVaultConfig()
+endpoint = kv.get_credential("LANGUAGE-ENDPOINT")
+key = kv.get_credential("LANGUAGE-KEY")
+```
+
+**Benefits:**
+- ✅ No secrets in code or Git
+- ✅ Centralized credential management
+- ✅ Audit trail for access
+- ✅ Easy rotation
+
+---
+
+### 2. Medical Text Translation
+
+**Translate to 100+ Languages:**
+```python
+from src.translator import MedicalTranslator
+
+translator = MedicalTranslator()
+
+# English to Turkish
+turkish = translator.translate("Patient has Type 2 Diabetes", "en", "tr")
+# Output: "Hastada Tip 2 Diyabet var"
+
+# English to German
+german = translator.translate("Prescribed Metformin 500mg BID", "en", "de")
+# Output: "Metformin 500 mg zweimal täglich verschrieben"
+```
+
+**Use Cases:**
+- International patient care
+- Medical record sharing across countries
+- Clinical trial documentation
+
+---
+
+### 3. Speech-to-Text for Clinical Notes
+
+**Convert Doctor Voice Recordings to Text:**
+```python
+from src.speech_processor import SpeechProcessor
+
+processor = SpeechProcessor()
+
+# Transcribe audio file
+result = processor.audio_to_text("doctor_notes.wav")
+if result["success"]:
+    print(result["text"])
+    # Output: "Patient complains of chest pain. Blood pressure 140 over 90. Prescribed aspirin."
+
+# Real-time microphone (during patient visit)
+result = processor.microphone_to_text()
+```
+
+**Use Cases:**
+- Hands-free documentation during patient exams
+- Transcribe recorded consultations
+- Voice-activated EHR entry
+
+---
+
 ### Verify Installation
 ```bash
 python src/test_connection.py
